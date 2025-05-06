@@ -1,0 +1,326 @@
+/* Custom styles for the dog breeding management application */
+
+/* General styling adjustments */
+body {
+    padding-top: 20px;
+    padding-bottom: 100px;
+}
+
+.page-header {
+    margin-bottom: 30px;
+}
+
+/* Dashboard cards */
+.dashboard-card {
+    transition: transform 0.3s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Dog cards */
+.dog-card {
+    height: 100%;
+    transition: transform 0.2s;
+}
+
+.dog-card:hover {
+    transform: scale(1.02);
+}
+
+.dog-detail-header {
+    background-color: var(--bs-dark);
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+/* Tables */
+.table-responsive {
+    border-radius: 5px;
+    overflow-x: auto;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Table adjustments for mobile */
+@media (max-width: 767.98px) {
+    .table-responsive table {
+        width: 100%;
+        table-layout: fixed;
+    }
+    
+    .table-responsive th, 
+    .table-responsive td {
+        padding: 0.4rem;
+        font-size: 0.85rem;
+        word-break: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* Dimensioni colonne specifiche per dispositivi mobili */
+    .table-responsive th:nth-child(1), 
+    .table-responsive td:nth-child(1) {
+        width: 22%; /* Data */
+    }
+    
+    .table-responsive th:nth-child(2), 
+    .table-responsive td:nth-child(2),
+    .table-responsive th:nth-child(3), 
+    .table-responsive td:nth-child(3) {
+        width: 22%; /* Femmina, Maschio */
+    }
+    
+    .table-responsive th:nth-child(4), 
+    .table-responsive td:nth-child(4) {
+        width: 20%; /* Tipo */
+    }
+    
+    .table-responsive th:nth-child(5), 
+    .table-responsive td:nth-child(5) {
+        width: 15%; /* Note */
+        max-width: 60px;
+    }
+    
+    .table-responsive th:nth-child(6), 
+    .table-responsive td:nth-child(6),
+    .table-responsive th:last-child, 
+    .table-responsive td:last-child {
+        width: 18%; /* Azioni */
+    }
+    
+    .badge {
+        font-size: 0.65rem;
+        padding: 0.3em 0.5em;
+        white-space: nowrap;
+    }
+    
+    .btn-sm {
+        padding: 0.15rem 0.3rem;
+        font-size: 0.7rem;
+    }
+    
+    /* Assicuriamo che la colonna delle femmine sia sempre visibile nelle statistiche */
+    #births th:nth-child(7), 
+    #births td:nth-child(7) {
+        display: table-cell !important;
+        background-color: rgba(255, 192, 203, 0.1); /* Leggero sfondo rosa per evidenziare la colonna */
+    }
+    
+    /* Aggiungiamo etichette esplicite per i valori su dispositivi mobili */
+    @media (max-width: 576px) {
+        #births td:nth-child(7)::before {
+            content: "F: ";
+            font-weight: bold;
+            color: var(--bs-pink);
+        }
+        
+        #births td:nth-child(6)::before {
+            content: "M: ";
+            font-weight: bold;
+            color: var(--bs-primary);
+        }
+    }
+    
+    /* Compatta tabella per dispositivi ultra piccoli */
+    @media (max-width: 374.98px) {
+        .table-responsive th, 
+        .table-responsive td {
+            font-size: 0.75rem;
+            padding: 0.3rem;
+        }
+    }
+}
+
+/* Forms */
+.form-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.input-group-text {
+    min-width: 120px;
+}
+
+/* Badges */
+.badge-pill {
+    border-radius: 20px;
+    padding: 5px 10px;
+}
+
+/* Statistics */
+.stats-card {
+    height: 100%;
+    transition: all 0.3s;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Per la tabella statistica nascite a cuccioli su mobile */
+@media (max-width: 767px) {
+    /* Miglioramenti per la scheda Parti */
+    #birth-types th:nth-child(1), 
+    #birth-types td:nth-child(1) {
+        width: 40%; /* Razza */
+    }
+    
+    #birth-types th:nth-child(2), 
+    #birth-types td:nth-child(2) {
+        width: 20%; /* Totale */
+    }
+    
+    #birth-types th:nth-child(3), 
+    #birth-types td:nth-child(3) {
+        width: 20%; /* Naturali */
+    }
+    
+    #birth-types th:nth-child(4), 
+    #birth-types td:nth-child(4) {
+        width: 20%; /* Cesarei */
+    }
+    
+    /* Per la scheda Cuccioli */
+    #births th:nth-child(6), 
+    #births td:nth-child(6) {
+        display: none; /* Nascondiamo la media su mobile */
+    }
+    
+    /* Mostriamo le colonne più importanti in modo esplicito */
+    #births th:nth-child(1), 
+    #births td:nth-child(1) {
+        width: 25%; /* Razza */
+    }
+    
+    #births th:nth-child(2), 
+    #births td:nth-child(2) {
+        width: 15%; /* Nascite */
+    }
+    
+    #births th:nth-child(3), 
+    #births td:nth-child(3) {
+        width: 20%; /* Cuccioli */
+    }
+    
+    #births th:nth-child(4), 
+    #births td:nth-child(4) {
+        width: 20%; /* Maschi */
+    }
+    
+    #births th:nth-child(5), 
+    #births td:nth-child(5) {
+        width: 20%; /* Femmine */
+    }
+    
+    /* Aggiungiamo prefissi per chiarezza */
+    #births td:nth-child(4)::before {
+        content: "M: ";
+        font-weight: bold;
+        color: var(--bs-primary);
+    }
+    
+    #births td:nth-child(5)::before {
+        content: "F: ";
+        font-weight: bold;
+        color: var(--bs-pink);
+    }
+    
+    /* Fix per statistiche per categoria - Assicuriamo che tutte le colonne siano visibili */
+    .table-responsive table th,
+    .table-responsive table td {
+        white-space: nowrap;
+        font-size: 0.8rem;
+        padding: 0.3rem;
+    }
+    
+    /* Razza */
+    .table-responsive table th:first-child,
+    .table-responsive table td:first-child {
+        width: 25%;
+        max-width: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* Uscite e Rientri */
+    .table-responsive table th:nth-child(8),
+    .table-responsive table td:nth-child(8),
+    .table-responsive table th:nth-child(9),
+    .table-responsive table td:nth-child(9) {
+        min-width: 30px !important;
+        max-width: 40px !important;
+        padding-left: 2px !important;
+        padding-right: 2px !important;
+        text-align: center !important;
+    }
+    
+    /* Fix specifico per tabella statistiche per categoria */
+    #categories-stats-table {
+        table-layout: fixed;
+        width: 100%;
+    }
+    
+    #categories-stats-table th,
+    #categories-stats-table td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.8rem;
+        padding: 0.3rem;
+    }
+    
+    /* Larghezze colonne per statistiche per categoria */
+    #categories-stats-table th:first-child,
+    #categories-stats-table td:first-child {
+        width: 22%;
+    }
+    
+    #categories-stats-table th:nth-child(2),
+    #categories-stats-table td:nth-child(2) {
+        width: 10%;
+    }
+    
+    #categories-stats-table th:nth-child(3),
+    #categories-stats-table td:nth-child(3),
+    #categories-stats-table th:nth-child(4),
+    #categories-stats-table td:nth-child(4) {
+        width: 9%;
+    }
+    
+    #categories-stats-table th:nth-child(5),
+    #categories-stats-table td:nth-child(5),
+    #categories-stats-table th:nth-child(6),
+    #categories-stats-table td:nth-child(6),
+    #categories-stats-table th:nth-child(7),
+    #categories-stats-table td:nth-child(7) {
+        width: 12%;
+    }
+    
+    #categories-stats-table th:nth-child(8),
+    #categories-stats-table td:nth-child(8),
+    #categories-stats-table th:nth-child(9),
+    #categories-stats-table td:nth-child(9) {
+        width: 7%;
+        text-align: center;
+    }
+}
+
+/* Search box */
+.search-box {
+    margin-bottom: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+}
