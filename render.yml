@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: piccolo-amico
+    env: docker
+    repo: https://github.com/yourusername/piccolo-amico.git # Sostituisci con il tuo repository
+    region: frankfurt # Sostituisci con la tua regione preferita
+    plan: free
+    branch: main
+    buildCommand: ./build.sh
+    numInstances: 1
+    healthCheckPath: /
+    envVars:
+      - key: SESSION_SECRET
+        generateValue: true
+    autoDeploy: false
+
+databases:
+  - name: piccolo-amico-db
+    databaseName: piccolo_amico
+    plan: free
+    region: frankfurt # Sostituisci con la stessa regione del web service

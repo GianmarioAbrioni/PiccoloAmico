@@ -1,0 +1,8 @@
+email-validator
+flask
+flask-sqlalchemy
+gunicorn
+openpyxl
+pandas
+pdfkit
+psycopg2-binary
