@@ -1,0 +1,77 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1>
+        <i class="fas fa-syringe me-2"></i>
+        {% if vaccination %}Modifica Vaccinazione{% else %}Aggiungi Nuova Vaccinazione{% endif %}
+    </h1>
+</div>
+
+<div class="form-container">
+    <form method="POST" class="needs-validation" novalidate>
+        {% if dog %}
+        <input type="hidden" name="from_dog" value="true">
+        {% endif %}
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Informazioni Vaccinazione</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="dog_id" class="form-label">Cane <span class="text-danger">*</span></label>
+                        {% if dog %}
+                        <input type="hidden" name="dog_id" value="{{ dog.id }}">
+                        <input type="text" class="form-control" value="{{ dog.name }}" readonly>
+                        {% else %}
+                        <select class="form-select" id="dog_id" name="dog_id" required>
+                            <option value="">Seleziona un cane</option>
+                            {% for d in dogs %}
+                            <option value="{{ d.id }}" {% if vaccination and vaccination.dog_id == d.id %}selected{% endif %}>{{ d.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Seleziona un cane.</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="type" class="form-label">Tipo Vaccinazione <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="type" name="type" value="{{ vaccination.type if vaccination else '' }}" required>
+                        <div class="invalid-feedback">Inserisci un tipo di vaccinazione.</div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="date" class="form-label">Data Vaccinazione <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="date" name="date" value="{{ vaccination.date.strftime('%Y-%m-%d') if vaccination and vaccination.date else '' }}" required>
+                        <div class="invalid-feedback">Inserisci una data di vaccinazione.</div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Note</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="3">{{ vaccination.notes if vaccination else '' }}</textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+            {% if dog %}
+            <a href="{{ url_for('dog_details', id=dog.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Torna al Cane
+            </a>
+            {% else %}
+            <a href="{{ url_for('vaccination_list') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Annulla
+            </a>
+            {% endif %}
+            
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save me-2"></i> {% if vaccination %}Aggiorna{% else %}Salva{% endif %} Vaccinazione
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

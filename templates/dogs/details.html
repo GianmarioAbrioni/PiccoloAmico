@@ -1,0 +1,481 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>{{ dog.name }}</h1>
+        <div class="lead">
+            <span class="badge bg-primary me-2">{{ dog.breed }}</span>
+            <span class="badge bg-secondary me-2">{{ dog.gender }}</span>
+            {% if dog.sold %}
+            <span class="badge bg-danger me-2">Venduto</span>
+            {% endif %}
+            {% if dog.in_breeding %}
+            <span class="badge bg-success me-2">In Riproduzione</span>
+            {% else %}
+            <span class="badge bg-secondary me-2">Non in Riproduzione</span>
+            {% endif %}
+            {% if dog.box %}
+            <span class="badge bg-info me-2">{{ dog.box }}</span>
+            {% endif %}
+            {% if dog.is_out %}
+            <span class="badge bg-warning text-dark me-2">Fuori struttura</span>
+            {% endif %}
+        </div>
+    </div>
+    <div>
+        <a href="{{ url_for('dog_edit', id=dog.id) }}" class="btn btn-warning">
+            <i class="fas fa-edit me-1"></i> Modifica
+        </a>
+        <a href="{{ url_for('move_box', id=dog.id) }}" class="btn btn-info">
+            <i class="fas fa-exchange-alt me-1"></i> Sposta Box
+        </a>
+        <a href="{{ url_for('toggle_out', id=dog.id) }}" class="btn {% if dog.is_out %}btn-success{% else %}btn-warning{% endif %}">
+            <i class="fas {% if dog.is_out %}fa-sign-in-alt{% else %}fa-sign-out-alt{% endif %} me-1"></i> 
+            {% if dog.is_out %}Rientro{% else %}Uscita{% endif %}
+        </a>
+        <a href="{{ url_for('generate_dog_pdf', id=dog.id) }}" class="btn btn-info" target="_blank">
+            <i class="fas fa-file-pdf me-1"></i> PDF
+        </a>
+        <button class="btn btn-danger delete-btn" data-action="{{ url_for('dog_delete', id=dog.id) }}">
+            <i class="fas fa-trash-alt me-1"></i> Elimina
+        </button>
+    </div>
+</div>
+
+<!-- Statistiche generali in card-deck -->
+<div class="row mb-4">
+    <!-- Info di base e Statistiche rapide -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i> Statistiche Rapide</h5>
+            </div>
+            <div class="card-body">
+                <!-- Accoppiamenti - Mostrati sempre con lo stesso formato per tutti i cani -->
+                <div class="stats-item mb-3">
+                    <h6><i class="fas fa-venus-mars me-1"></i> Accoppiamenti</h6>
+                    <div class="display-6 text-center mb-2">{{ mating_stats.count|default(0) }}</div>
+                    <!-- Dettagli accoppiamenti mostrati sempre, anche se 0 -->
+                    <div class="row text-center small">
+                        <div class="col-6">
+                            <i class="fas fa-leaf text-success"></i> Naturali<br>
+                            <span class="fw-bold">{{ mating_stats.natural|default(0) }}</span>
+                        </div>
+                        <div class="col-6">
+                            <i class="fas fa-syringe text-primary"></i> Artificiali<br>
+                            <span class="fw-bold">{{ mating_stats.artificial|default(0) }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if dog.gender == 'Female' %}
+                <!-- Nascite solo per femmine -->
+                <div class="stats-item mb-3">
+                    <h6><i class="fas fa-baby me-1"></i> Nascite</h6>
+                    <div class="display-6 text-center mb-2">{{ birth_stats.count|default(0) }}</div>
+                    <!-- Dettagli nascite mostrati sempre, anche se 0 -->
+                    <div class="row text-center small">
+                        <div class="col-6">
+                            <i class="fas fa-venus text-danger"></i> Femmine<br>
+                            <span class="fw-bold">{{ birth_stats.total_females|default(0) }}</span>
+                        </div>
+                        <div class="col-6">
+                            <i class="fas fa-mars text-primary"></i> Maschi<br>
+                            <span class="fw-bold">{{ birth_stats.total_males|default(0) }}</span>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <i class="fas fa-calculator"></i> Media cuccioli per parto<br>
+                            <span class="fw-bold">{{ "%.1f"|format(birth_stats.avg_litter_size|default(0)) }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Movimenti - Mostrati sempre con lo stesso formato per tutti i cani -->
+                <div class="stats-item">
+                    <h6><i class="fas fa-history me-1"></i> Movimenti</h6>
+                    <div class="display-6 text-center mb-2">{{ out_logs|length }}</div>
+                    <!-- Dettagli movimenti mostrati sempre, anche se 0 -->
+                    <div class="row text-center small">
+                        <div class="col-6">
+                            <i class="fas fa-sign-out-alt text-warning"></i> Uscite<br>
+                            <span class="fw-bold">{{ out_logs|selectattr('action', 'equalto', 'out')|list|length }}</span>
+                        </div>
+                        <div class="col-6">
+                            <i class="fas fa-sign-in-alt text-success"></i> Rientri<br>
+                            <span class="fw-bold">{{ out_logs|selectattr('action', 'equalto', 'return')|list|length }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Details -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Informazioni di Base</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Data di Nascita</dt>
+                    <dd class="col-sm-8">{{ dog.birth_date|date }}</dd>
+                    
+                    <dt class="col-sm-4">Età</dt>
+                    <dd class="col-sm-8">{{ dog.birth_date|calculate_age }} anni</dd>
+                    
+                    <dt class="col-sm-4">Mantello</dt>
+                    <dd class="col-sm-8">{{ dog.coat }}</dd>
+                    
+                    <dt class="col-sm-4">Microchip</dt>
+                    <dd class="col-sm-8">
+                        {% if dog.microchip_number %}
+                        {{ dog.microchip_number }} ({{ dog.microchip_date|date }})
+                        {% else %}
+                        Non microcippato
+                        {% endif %}
+                    </dd>
+                    
+                    <dt class="col-sm-4">Stato Riproduzione</dt>
+                    <dd class="col-sm-8">
+                        {% if dog.in_breeding %}
+                        <span class="text-success">In Riproduzione</span>
+                        {% else %}
+                        <span class="text-secondary">Non in Riproduzione</span>
+                        {% endif %}
+                    </dd>
+                    
+                    <dt class="col-sm-4">Stato Vendita</dt>
+                    <dd class="col-sm-8">
+                        {% if dog.sold %}
+                        <span class="text-danger">Venduto ({{ dog.sold_date|date }})</span>
+                        {% else %}
+                        <span class="text-success">Non Venduto</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Box</dt>
+                    <dd class="col-sm-8">
+                        {% if dog.box %}
+                        <a href="{{ url_for('box_view', box_number=dog.box) }}">{{ dog.box }}</a>
+                        {% else %}
+                        <span class="text-muted">Nessun box assegnato</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-4">Presenza</dt>
+                    <dd class="col-sm-8">
+                        {% if dog.is_out %}
+                        <span class="text-warning">Fuori struttura</span>
+                        {% if dog.out_date %}
+                        <small class="d-block text-muted">Uscito il {{ dog.out_date|date }}</small>
+                        {% endif %}
+                        {% if dog.return_date %}
+                        <small class="d-block text-muted">Rientro previsto: {{ dog.return_date|date }}</small>
+                        {% endif %}
+                        {% else %}
+                        <span class="text-success">Presente in struttura</span>
+                        {% endif %}
+                    </dd>
+                </dl>
+                
+                {% if dog.notes %}
+                <div class="mt-3">
+                    <h6>Note</h6>
+                    <p class="card-text">{{ dog.notes }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Genealogy -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-family-tree me-2"></i> Genealogia</h5>
+            </div>
+            <div class="card-body">
+                <h6>Genitori</h6>
+                <dl class="row">
+                    <dt class="col-sm-3">Madre</dt>
+                    <dd class="col-sm-9">
+                        {% if dog.mother %}
+                        <a href="{{ url_for('dog_details', id=dog.mother.id) }}">{{ dog.mother.name }}</a>
+                        {% else %}
+                        Sconosciuta
+                        {% endif %}
+                    </dd>
+                    
+                    <dt class="col-sm-3">Padre</dt>
+                    <dd class="col-sm-9">
+                        {% if dog.father %}
+                        <a href="{{ url_for('dog_details', id=dog.father.id) }}">{{ dog.father.name }}</a>
+                        {% else %}
+                        Sconosciuto
+                        {% endif %}
+                    </dd>
+                </dl>
+                
+                <h6 class="mt-4">Progenie ({{ offspring|length }})</h6>
+                {% if offspring %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Data di Nascita</th>
+                                <th>Genere</th>
+                                <th>Stato</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for puppy in offspring %}
+                            <tr>
+                                <td><a href="{{ url_for('dog_details', id=puppy.id) }}">{{ puppy.name }}</a></td>
+                                <td>{{ puppy.birth_date|date }}</td>
+                                <td>{{ puppy.gender }}</td>
+                                <td>
+                                    {% if puppy.sold %}
+                                    <span class="badge bg-danger">Venduto</span>
+                                    {% else %}
+                                    <span class="badge bg-success">Disponibile</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">Nessuna progenie registrata</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Storico movimenti -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i> Storico Movimenti</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if out_logs %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Azione</th>
+                        <th>Data Rientro Prevista</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in out_logs %}
+                    <tr>
+                        <td>{{ log.date|date }}</td>
+                        <td>
+                            {% if log.action == 'out' %}
+                            <span class="badge bg-warning text-dark"><i class="fas fa-sign-out-alt me-1"></i> Uscita</span>
+                            {% else %}
+                            <span class="badge bg-success"><i class="fas fa-sign-in-alt me-1"></i> Rientro</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if log.expected_return_date %}
+                            {{ log.expected_return_date|date }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>{{ log.notes }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <p class="text-muted mb-0">Nessun movimento registrato per questo cane</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Vaccinations -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-syringe me-2"></i> Vaccinazioni</h5>
+        <a href="{{ url_for('vaccination_new', dog_id=dog.id) }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> Aggiungi Vaccinazione
+        </a>
+    </div>
+    <div class="card-body p-0">
+        {% if vaccinations %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Data</th>
+                        <th>Note</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vaccination in vaccinations %}
+                    <tr>
+                        <td>{{ vaccination.type }}</td>
+                        <td>{{ vaccination.date|date }}</td>
+                        <td>{{ vaccination.notes }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('vaccination_edit', id=vaccination.id, from_dog=true) }}" class="btn btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-danger delete-btn" data-action="{{ url_for('vaccination_delete', id=vaccination.id) }}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <p class="text-muted mb-0">Nessuna vaccinazione registrata per questo cane</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Matings -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-venus-mars me-2"></i> 
+            {% if dog.gender == 'Female' %}
+            Accoppiamenti come Femmina
+            {% else %}
+            Accoppiamenti come Maschio
+            {% endif %}
+        </h5>
+        <a href="{{ url_for('mating_new', dog_id=dog.id) }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> Aggiungi Accoppiamento
+        </a>
+    </div>
+    <div class="card-body p-0">
+        {% if matings %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Tipo</th>
+                        {% if dog.gender == 'Female' %}
+                        <th>Maschio</th>
+                        {% else %}
+                        <th>Femmina</th>
+                        {% endif %}
+                        <th>Note</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mating in matings %}
+                    <tr>
+                        <td>{{ mating.date|date }}</td>
+                        <td>{{ mating.type|mating_type }}</td>
+                        {% if dog.gender == 'Female' %}
+                        <td><a href="{{ url_for('dog_details', id=mating.male.id) }}">{{ mating.male.name }}</a></td>
+                        {% else %}
+                        <td><a href="{{ url_for('dog_details', id=mating.female.id) }}">{{ mating.female.name }}</a></td>
+                        {% endif %}
+                        <td>{{ mating.notes }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('mating_edit', id=mating.id, dog_id=dog.id) }}" class="btn btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-danger delete-btn" data-action="{{ url_for('mating_delete', id=mating.id) }}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <p class="text-muted mb-0">Nessun accoppiamento registrato per questo cane</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if dog.gender == 'Female' %}
+<!-- Births (for females) -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-baby me-2"></i> Nascite</h5>
+        <a href="{{ url_for('birth_new', dog_id=dog.id) }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> Aggiungi Nascita
+        </a>
+    </div>
+    <div class="card-body p-0">
+        {% if births %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Tipo</th>
+                        <th>Cuccioli</th>
+                        <th>Maschi/Femmine</th>
+                        <th>Note</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for birth in births %}
+                    <tr>
+                        <td>{{ birth.date|date }}</td>
+                        <td>{{ birth.type|birth_type }}</td>
+                        <td>{{ birth.puppies_count }}</td>
+                        <td>{{ birth.male_count }}/{{ birth.female_count }}</td>
+                        <td>{{ birth.notes }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('birth_edit', id=birth.id, dog_id=dog.id) }}" class="btn btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-danger delete-btn" data-action="{{ url_for('birth_delete', id=birth.id) }}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <p class="text-muted mb-0">Nessuna nascita registrata per questo cane</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Hidden form for deletion -->
+<form id="delete-form" method="POST" style="display: none;"></form>
+{% endblock %}

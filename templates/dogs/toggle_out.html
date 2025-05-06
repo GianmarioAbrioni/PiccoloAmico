@@ -1,0 +1,86 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1><i class="fas fa-sign-out-alt me-2"></i> {% if dog.is_out %}Registra Rientro{% else %}Registra Uscita{% endif %}</h1>
+        <p class="lead">{% if dog.is_out %}Registra il rientro di{% else %}Registra l'uscita di{% endif %} <strong>{{ dog.name }}</strong> {% if dog.is_out %}nella{% else %}dalla{% endif %} struttura</p>
+    </div>
+    <a href="{{ url_for('dog_details', id=dog.id) }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i> Annulla
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Informazioni Cane</h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p><strong>Nome:</strong> {{ dog.name }}</p>
+                <p><strong>Razza:</strong> {{ dog.breed }}</p>
+                <p><strong>Genere:</strong> {{ dog.gender }}</p>
+                <p><strong>Box:</strong> {{ dog.box if dog.box else "Nessun box assegnato" }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Microchip:</strong> {{ dog.microchip_number if dog.microchip_number else "Non disponibile" }}</p>
+                <p><strong>Età:</strong> {{ dog.birth_date|calculate_age }} anni</p>
+                <p><strong>Stato:</strong> 
+                    {% if dog.sold %}
+                        <span class="badge bg-danger">Venduto</span>
+                    {% elif dog.in_breeding %}
+                        <span class="badge bg-success">In Riproduzione</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Non in Riproduzione</span>
+                    {% endif %}
+                    
+                    {% if dog.is_out %}
+                    <span class="badge bg-warning">Fuori Struttura</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        
+        {% if dog.is_out %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> Il cane è uscito dalla struttura il <strong>{{ dog.out_date|date }}</strong>{% if dog.return_date %} con rientro previsto il <strong>{{ dog.return_date|date }}</strong>{% endif %}.
+        </div>
+        
+        <form method="post" action="{{ url_for('toggle_out', id=dog.id) }}">
+            <input type="hidden" name="action" value="return">
+            
+            <div class="d-flex justify-content-end">
+                <a href="{{ url_for('dog_details', id=dog.id) }}" class="btn btn-secondary me-2">Annulla</a>
+                <button type="submit" class="btn btn-primary">Registra Rientro</button>
+            </div>
+        </form>
+        {% else %}
+        <form method="post" action="{{ url_for('toggle_out', id=dog.id) }}">
+            <input type="hidden" name="action" value="out">
+            
+            <div class="mb-3">
+                <label for="out_date" class="form-label">Data Uscita</label>
+                <input type="date" class="form-control" id="out_date" name="out_date" value="{{ now.strftime('%Y-%m-%d') }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="return_date" class="form-label">Data Rientro Prevista</label>
+                <input type="date" class="form-control" id="return_date" name="return_date">
+                <div class="form-text">Opzionale. Lasciare vuoto se la data di rientro non è nota.</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="notes" class="form-label">Note</label>
+                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Motivo dell'uscita, destinazione, etc."></textarea>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+                <a href="{{ url_for('dog_details', id=dog.id) }}" class="btn btn-secondary me-2">Annulla</a>
+                <button type="submit" class="btn btn-primary">Registra Uscita</button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

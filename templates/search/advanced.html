@@ -1,0 +1,269 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <h1>Ricerca Avanzata</h1>
+</div>
+
+<!-- Filtri di ricerca -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-filter me-2"></i> Filtri</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('advanced_search') }}" class="row g-3">
+            <!-- Filtri generali del cane -->
+            <div class="col-md-4">
+                <label for="name" class="form-label">Nome</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ request.args.get('name', '') }}">
+            </div>
+            
+            <div class="col-md-4">
+                <label for="breed" class="form-label">Razza</label>
+                <select class="form-select" id="breed" name="breed">
+                    <option value="">Tutte le razze</option>
+                    {% for breed in breeds %}
+                    <option value="{{ breed }}" {% if request.args.get('breed') == breed %}selected{% endif %}>{{ breed }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label for="box" class="form-label">Box</label>
+                <select class="form-select" id="box" name="box">
+                    <option value="">Tutti i box</option>
+                    {% for box in boxes %}
+                    <option value="{{ box }}" {% if request.args.get('box') == box %}selected{% endif %}>{{ box }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label for="gender" class="form-label">Genere</label>
+                <select class="form-select" id="gender" name="gender">
+                    <option value="">Entrambi</option>
+                    <option value="Male" {% if request.args.get('gender') == 'Male' %}selected{% endif %}>Maschio</option>
+                    <option value="Female" {% if request.args.get('gender') == 'Female' %}selected{% endif %}>Femmina</option>
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label for="presence" class="form-label">Presenza</label>
+                <select class="form-select" id="presence" name="presence">
+                    <option value="">Tutti</option>
+                    <option value="in" {% if request.args.get('presence') == 'in' %}selected{% endif %}>In struttura</option>
+                    <option value="out" {% if request.args.get('presence') == 'out' %}selected{% endif %}>Fuori struttura</option>
+                </select>
+            </div>
+            
+            <!-- Filtri per tipo di evento -->
+            <div class="col-md-4">
+                <label for="event_type" class="form-label">Tipo di evento</label>
+                <select class="form-select" id="event_type" name="event_type">
+                    <option value="">Nessun evento specifico</option>
+                    <option value="out" {% if request.args.get('event_type') == 'out' %}selected{% endif %}>Uscita</option>
+                    <option value="return" {% if request.args.get('event_type') == 'return' %}selected{% endif %}>Rientro</option>
+                    <option value="mating" {% if request.args.get('event_type') == 'mating' %}selected{% endif %}>Accoppiamento</option>
+                    <option value="birth" {% if request.args.get('event_type') == 'birth' %}selected{% endif %}>Parto</option>
+                    <option value="vaccination" {% if request.args.get('event_type') == 'vaccination' %}selected{% endif %}>Vaccinazione</option>
+                </select>
+            </div>
+            
+            <!-- Filtri per data -->
+            <div class="col-md-4">
+                <label for="start_date" class="form-label">Data inizio</label>
+                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request.args.get('start_date', '') }}">
+            </div>
+            
+            <div class="col-md-4">
+                <label for="end_date" class="form-label">Data fine</label>
+                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request.args.get('end_date', '') }}">
+            </div>
+            
+            <!-- Bottoni di azione -->
+            <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search me-1"></i> Cerca
+                </button>
+                
+                <a href="{{ url_for('advanced_search') }}" class="btn btn-secondary ms-2">
+                    <i class="fas fa-sync-alt me-1"></i> Reset
+                </a>
+                
+                {% if filtered %}
+                <a href="{{ url_for('export_search_results') }}?{{ request.query_string.decode() }}" class="btn btn-success ms-2">
+                    <i class="fas fa-file-excel me-1"></i> Esporta risultati
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Risultati della ricerca -->
+{% if filtered %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i> Risultati</h5>
+        <span class="badge bg-primary">{{ results|length }} trovati</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            {% if results %}
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Razza</th>
+                        <th>Genere</th>
+                        <th>Box</th>
+                        <th>Stato</th>
+                        {% if event_type == 'out' %}
+                        <th>Data uscita</th>
+                        <th>Rientro previsto</th>
+                        {% elif event_type == 'return' %}
+                        <th>Data rientro</th>
+                        {% elif event_type == 'mating' %}
+                        <th>Data accoppiamento</th>
+                        <th>Tipo</th>
+                        <th>Partner</th>
+                        {% elif event_type == 'birth' %}
+                        <th>Data parto</th>
+                        <th>Tipo</th>
+                        <th>Cuccioli</th>
+                        {% elif event_type == 'vaccination' %}
+                        <th>Data vaccinazione</th>
+                        <th>Vaccino</th>
+                        {% endif %}
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result.dog.name }}</td>
+                        <td>{{ result.dog.breed }}</td>
+                        <td>{{ 'Maschio' if result.dog.gender == 'Male' else 'Femmina' }}</td>
+                        <td>{{ result.dog.box or '-' }}</td>
+                        <td>
+                            {% if result.dog.is_out %}
+                            <span class="badge bg-warning">Fuori struttura</span>
+                            {% else %}
+                            <span class="badge bg-success">In struttura</span>
+                            {% endif %}
+                        </td>
+                        
+                        {% if event_type == 'out' %}
+                        <td>{{ result.event.date|date }}</td>
+                        <td>{{ result.event.expected_return_date|date if result.event.expected_return_date else '-' }}</td>
+                        {% elif event_type == 'return' %}
+                        <td>{{ result.event.date|date }}</td>
+                        {% elif event_type == 'mating' %}
+                        <td>{{ result.event.date|date }}</td>
+                        <td>{{ result.event.type|mating_type }}</td>
+                        <td>
+                            {% if result.dog.gender == 'Male' %}
+                            <a href="{{ url_for('dog_details', id=result.event.female_id) }}">
+                                {{ result.event.female.name }}
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('dog_details', id=result.event.male_id) }}">
+                                {{ result.event.male.name }}
+                            </a>
+                            {% endif %}
+                        </td>
+                        {% elif event_type == 'birth' %}
+                        <td>{{ result.event.date|date }}</td>
+                        <td>{{ result.event.type|birth_type }}</td>
+                        <td>
+                            {{ result.event.puppies_count }} 
+                            ({{ result.event.male_count }} M, {{ result.event.female_count }} F)
+                        </td>
+                        {% elif event_type == 'vaccination' %}
+                        <td>{{ result.event.date|date }}</td>
+                        <td>{{ result.event.type }}</td>
+                        {% endif %}
+                        
+                        <td>
+                            <a href="{{ url_for('dog_details', id=result.dog.id) }}" class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i> Dettagli
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="alert alert-info m-3">
+                Nessun risultato trovato con i criteri di ricerca specificati.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i> Seleziona i filtri e clicca su "Cerca" per visualizzare i risultati.
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mostra/nascondi campi di data in base al tipo di evento selezionato
+    const eventTypeSelect = document.getElementById('event_type');
+    const dateFields = document.querySelectorAll('#start_date, #end_date');
+    const dateLabels = document.querySelectorAll('label[for="start_date"], label[for="end_date"]');
+    
+    function updateDateVisibility() {
+        const showDates = eventTypeSelect.value !== '';
+        
+        dateFields.forEach(field => {
+            field.parentElement.style.display = showDates ? 'block' : 'block';
+        });
+        
+        dateLabels.forEach(label => {
+            if (eventTypeSelect.value === 'out') {
+                if (label.getAttribute('for') === 'start_date') {
+                    label.textContent = 'Data uscita (da)';
+                } else {
+                    label.textContent = 'Data uscita (a)';
+                }
+            } else if (eventTypeSelect.value === 'return') {
+                if (label.getAttribute('for') === 'start_date') {
+                    label.textContent = 'Data rientro (da)';
+                } else {
+                    label.textContent = 'Data rientro (a)';
+                }
+            } else if (eventTypeSelect.value === 'mating') {
+                if (label.getAttribute('for') === 'start_date') {
+                    label.textContent = 'Data accoppiamento (da)';
+                } else {
+                    label.textContent = 'Data accoppiamento (a)';
+                }
+            } else if (eventTypeSelect.value === 'birth') {
+                if (label.getAttribute('for') === 'start_date') {
+                    label.textContent = 'Data parto (da)';
+                } else {
+                    label.textContent = 'Data parto (a)';
+                }
+            } else if (eventTypeSelect.value === 'vaccination') {
+                if (label.getAttribute('for') === 'start_date') {
+                    label.textContent = 'Data vaccinazione (da)';
+                } else {
+                    label.textContent = 'Data vaccinazione (a)';
+                }
+            } else {
+                if (label.getAttribute('for') === 'start_date') {
+                    label.textContent = 'Data inizio';
+                } else {
+                    label.textContent = 'Data fine';
+                }
+            }
+        });
+    }
+    
+    eventTypeSelect.addEventListener('change', updateDateVisibility);
+    updateDateVisibility(); // Esegui all'avvio
+});
+</script>
+{% endblock %}

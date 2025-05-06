@@ -1,0 +1,212 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1>
+        <i class="fas fa-dog me-2"></i>
+        {% if dog %}Modifica Cane: {{ dog.name }}{% else %}Aggiungi Nuovo Cane{% endif %}
+    </h1>
+</div>
+
+<div class="form-container">
+    <form method="POST" class="needs-validation" novalidate>
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Informazioni di Base</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label">Nome <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ dog.name if dog else '' }}" required>
+                        <div class="invalid-feedback">Inserisci un nome.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="breed" class="form-label">Razza <span class="text-danger">*</span></label>
+                        <select class="form-select" id="breed" name="breed" required>
+                            <option value="">Seleziona razza</option>
+                            {% for breed in breeds %}
+                            <option value="{{ breed }}" {% if dog and dog.breed == breed %}selected{% endif %}>{{ breed }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Seleziona una razza.</div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="birth_date" class="form-label">Data di Nascita <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="birth_date" name="birth_date" value="{{ dog.birth_date.strftime('%Y-%m-%d') if dog and dog.birth_date else '' }}" required>
+                        <div class="invalid-feedback">Inserisci una data di nascita.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="gender" class="form-label">Genere <span class="text-danger">*</span></label>
+                        <select class="form-select" id="gender" name="gender" required>
+                            <option value="">Seleziona genere</option>
+                            <option value="Male" {% if dog and dog.gender == 'Male' %}selected{% endif %}>Maschio</option>
+                            <option value="Female" {% if dog and dog.gender == 'Female' %}selected{% endif %}>Femmina</option>
+                        </select>
+                        <div class="invalid-feedback">Seleziona un genere.</div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="coat" class="form-label">Mantello</label>
+                        <input type="text" class="form-control" id="coat" name="coat" value="{{ dog.coat if dog else '' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="microchip_number" class="form-label">Numero Microchip</label>
+                        <input type="text" class="form-control" id="microchip_number" name="microchip_number" value="{{ dog.microchip_number if dog else '' }}">
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="microchip_date" class="form-label">Data Microchip</label>
+                        <input type="date" class="form-control" id="microchip_date" name="microchip_date" value="{{ dog.microchip_date.strftime('%Y-%m-%d') if dog and dog.microchip_date else '' }}">
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="in_breeding" name="in_breeding" {% if dog is not defined or dog.in_breeding %}checked{% endif %}>
+                            <label class="form-check-label" for="in_breeding">In Riproduzione</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="sold" name="sold" {% if dog and dog.sold %}checked{% endif %}>
+                            <label class="form-check-label" for="sold">Venduto</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3" id="sold-date-container" {% if not dog or not dog.sold %}style="display: none;"{% endif %}>
+                    <div class="col-md-6">
+                        <label for="sold_date" class="form-label">Data Vendita</label>
+                        <input type="date" class="form-control" id="sold_date" name="sold_date" value="{{ dog.sold_date.strftime('%Y-%m-%d') if dog and dog.sold_date else '' }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Genealogia</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="mother_id" class="form-label">Madre</label>
+                        <select class="form-select" id="mother_id" name="mother_id">
+                            <option value="">Seleziona madre (opzionale)</option>
+                            {% for female_dog in female_dogs %}
+                            <option value="{{ female_dog.id }}" {% if dog and dog.mother_id == female_dog.id %}selected{% endif %}>{{ female_dog.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="father_id" class="form-label">Padre</label>
+                        <select class="form-select" id="father_id" name="father_id">
+                            <option value="">Seleziona padre (opzionale)</option>
+                            {% for male_dog in male_dogs %}
+                            <option value="{{ male_dog.id }}" {% if dog and dog.father_id == male_dog.id %}selected{% endif %}>{{ male_dog.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Gestione Box e Presenza</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="box" class="form-label">Box</label>
+                        <select class="form-select" id="box" name="box">
+                            <option value="">Nessun box assegnato</option>
+                            {% for box in boxes %}
+                            <option value="{{ box }}" {% if dog and dog.box == box %}selected{% endif %}>{{ box }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="is_out" name="is_out" {% if dog and dog.is_out %}checked{% endif %}>
+                            <label class="form-check-label" for="is_out">Fuori struttura</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3" id="out-dates-container" {% if not dog or not dog.is_out %}style="display: none;"{% endif %}>
+                    <div class="col-md-6">
+                        <label for="out_date" class="form-label">Data Uscita</label>
+                        <input type="date" class="form-control" id="out_date" name="out_date" value="{{ dog.out_date.strftime('%Y-%m-%d') if dog and dog.out_date else '' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="return_date" class="form-label">Data Rientro Prevista</label>
+                        <input type="date" class="form-control" id="return_date" name="return_date" value="{{ dog.return_date.strftime('%Y-%m-%d') if dog and dog.return_date else '' }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Informazioni Addizionali</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Note</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="4">{{ dog.notes if dog else '' }}</textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+            <a href="{{ url_for('dog_details', id=dog.id) if dog else url_for('dog_list') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Annulla
+            </a>
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save me-2"></i> {% if dog %}Aggiorna{% else %}Salva{% endif %} Cane
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show/hide sold date based on sold checkbox
+        const soldCheckbox = document.getElementById('sold');
+        const soldDateContainer = document.getElementById('sold-date-container');
+        
+        soldCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                soldDateContainer.style.display = 'block';
+            } else {
+                soldDateContainer.style.display = 'none';
+            }
+        });
+        
+        // Show/hide out dates based on is_out checkbox
+        const outCheckbox = document.getElementById('is_out');
+        const outDatesContainer = document.getElementById('out-dates-container');
+        
+        outCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                outDatesContainer.style.display = 'block';
+            } else {
+                outDatesContainer.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

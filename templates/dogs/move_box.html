@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1><i class="fas fa-exchange-alt me-2"></i> Sposta Cane</h1>
+        <p class="lead">Sposta <strong>{{ dog.name }}</strong> in un altro box</p>
+    </div>
+    <a href="{{ url_for('dog_details', id=dog.id) }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i> Annulla
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Informazioni Cane</h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p><strong>Nome:</strong> {{ dog.name }}</p>
+                <p><strong>Razza:</strong> {{ dog.breed }}</p>
+                <p><strong>Genere:</strong> {{ dog.gender }}</p>
+                <p><strong>Box Attuale:</strong> {{ dog.box if dog.box else "Nessun box assegnato" }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Microchip:</strong> {{ dog.microchip_number if dog.microchip_number else "Non disponibile" }}</p>
+                <p><strong>Età:</strong> {{ dog.birth_date|calculate_age }} anni</p>
+                <p><strong>Stato:</strong> 
+                    {% if dog.sold %}
+                        <span class="badge bg-danger">Venduto</span>
+                    {% elif dog.in_breeding %}
+                        <span class="badge bg-success">In Riproduzione</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Non in Riproduzione</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        
+        <form method="post" action="{{ url_for('move_box', id=dog.id) }}">
+            <div class="mb-3">
+                <label for="new_box" class="form-label">Seleziona Nuovo Box</label>
+                <select class="form-select" id="new_box" name="new_box" required>
+                    <option value="">-- Seleziona Box --</option>
+                    <option value="">Nessun box (rimuovi da box)</option>
+                    {% for i in range(1, 17) %}
+                    <option value="Box {{ i }}" {% if dog.box == 'Box ' + i|string %}disabled{% endif %}>
+                        Box {{ i }} {% if dog.box == 'Box ' + i|string %}(Attuale){% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+                <a href="{{ url_for('dog_details', id=dog.id) }}" class="btn btn-secondary me-2">Annulla</a>
+                <button type="submit" class="btn btn-primary">Sposta Cane</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

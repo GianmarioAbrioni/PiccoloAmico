@@ -1,0 +1,271 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <h1>Statistiche per Categoria</h1>
+</div>
+
+<!-- Category Filter Form -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-filter me-2"></i> Filtra per Categoria</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('statistics_by_category') }}" class="row align-items-end g-3">
+            <div class="col-md-3">
+                <label for="category_type" class="form-label">Tipo di Categoria</label>
+                <select class="form-select" id="category_type" name="category_type">
+                    <option value="breed" {% if category_type == 'breed' %}selected{% endif %}>Razza</option>
+                    <option value="box" {% if category_type == 'box' %}selected{% endif %}>Box</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label for="start_date" class="form-label">Data Inizio</label>
+                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|date('%Y-%m-%d') if start_date else '' }}">
+            </div>
+            
+            <div class="col-md-3">
+                <label for="end_date" class="form-label">Data Fine</label>
+                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|date('%Y-%m-%d') if end_date else '' }}">
+            </div>
+            
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter me-1"></i> Filtra
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    {% if category_type == 'breed' %}
+                    <i class="fas fa-paw me-2"></i> Totale Cani per Razza
+                    {% else %}
+                    <i class="fas fa-th-large me-2"></i> Totale Cani per Box
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="position: relative; height:300px;">
+                    <canvas id="dogsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    {% if category_type == 'breed' %}
+                    <i class="fas fa-venus-mars me-2"></i> Accoppiamenti per Razza
+                    {% else %}
+                    <i class="fas fa-venus-mars me-2"></i> Accoppiamenti per Box
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="position: relative; height:300px;">
+                    <canvas id="matingsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    {% if category_type == 'breed' %}
+                    <i class="fas fa-baby me-2"></i> Nascite per Razza
+                    {% else %}
+                    <i class="fas fa-baby me-2"></i> Nascite per Box
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="position: relative; height:300px;">
+                    <canvas id="birthsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    {% if category_type == 'breed' %}
+                    <i class="fas fa-sign-out-alt me-2"></i> Movimenti per Razza
+                    {% else %}
+                    <i class="fas fa-sign-out-alt me-2"></i> Movimenti per Box
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="position: relative; height:300px;">
+                    <canvas id="movementsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Tables -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            {% if category_type == 'breed' %}
+            <i class="fas fa-table me-2"></i> Dettaglio Statistiche per Razza
+            {% else %}
+            <i class="fas fa-table me-2"></i> Dettaglio Statistiche per Box
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="categories-stats-table">
+                <thead>
+                    <tr>
+                        {% if category_type == 'breed' %}
+                        <th>Razza</th>
+                        {% else %}
+                        <th>Box</th>
+                        {% endif %}
+                        <th>Totale Cani</th>
+                        <th>Maschi</th>
+                        <th>Femmine</th>
+                        <th>Accoppiamenti</th>
+                        <th>Nascite</th>
+                        <th>Cuccioli</th>
+                        <th>Uscite</th>
+                        <th>Rientri</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td>{{ category.name }}</td>
+                        <td>{{ category.total_dogs }}</td>
+                        <td>{{ category.male_count }}</td>
+                        <td>{{ category.female_count }}</td>
+                        <td>{{ category.mating_count }}</td>
+                        <td>{{ category.birth_count }}</td>
+                        <td>{{ category.puppy_count }}</td>
+                        <td>{{ category.out_count }}</td>
+                        <td>{{ category.return_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Colors for charts
+    const colors = [
+        'rgba(54, 162, 235, 0.8)',
+        'rgba(255, 99, 132, 0.8)',
+        'rgba(75, 192, 192, 0.8)',
+        'rgba(255, 159, 64, 0.8)',
+        'rgba(153, 102, 255, 0.8)',
+        'rgba(255, 205, 86, 0.8)',
+        'rgba(201, 203, 207, 0.8)',
+        'rgba(255, 99, 71, 0.8)',
+        'rgba(50, 205, 50, 0.8)',
+        'rgba(138, 43, 226, 0.8)',
+    ];
+    
+    // Funzione helper per configurare i grafici
+    function setupChart(chartId, label, data, colorIndex = null, isDoubleDataset = false) {
+        try {
+            const chartElement = document.getElementById(chartId);
+            if (!chartElement) {
+                console.warn(`Elemento grafico #${chartId} non trovato`);
+                return;
+            }
+            
+            const ctx = chartElement.getContext('2d');
+            if (!ctx) {
+                console.warn(`Impossibile ottenere il contesto 2D per #${chartId}`);
+                return;
+            }
+
+            let datasets = [];
+            
+            if (isDoubleDataset) {
+                // Per il grafico dei movimenti con due serie di dati
+                datasets = [
+                    {
+                        label: 'Uscite',
+                        data: {{ categories_outs|tojson }},
+                        backgroundColor: 'rgba(255, 159, 64, 0.8)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Rientri',
+                        data: {{ categories_returns|tojson }},
+                        backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }
+                ];
+            } else {
+                // Per grafici con una singola serie di dati
+                const bgColors = colorIndex !== null ? colors[colorIndex] : colors;
+                
+                datasets = [{
+                    label: label,
+                    data: data,
+                    backgroundColor: bgColors,
+                    borderColor: Array.isArray(bgColors) 
+                        ? bgColors.map(color => color.replace('0.8', '1')) 
+                        : bgColors.replace('0.8', '1'),
+                    borderWidth: 1
+                }];
+            }
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: {{ categories_labels|tojson }},
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error(`Errore durante la configurazione del grafico ${chartId}:`, error);
+        }
+    }
+    
+    // Setup di ciascun grafico
+    setupChart('dogsChart', 'Totale Cani', {{ categories_dogs|tojson }});
+    setupChart('matingsChart', 'Accoppiamenti', {{ categories_matings|tojson }});
+    setupChart('birthsChart', 'Nascite', {{ categories_births|tojson }});
+    setupChart('movementsChart', '', [], null, true); // Grafico speciale con due dataset
+});
+</script>
+{% endblock %}

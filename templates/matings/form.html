@@ -1,0 +1,92 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1>
+        <i class="fas fa-venus-mars me-2"></i>
+        {% if mating %}Modifica Accoppiamento{% else %}Aggiungi Nuovo Accoppiamento{% endif %}
+    </h1>
+</div>
+
+<div class="form-container">
+    <form method="POST" class="needs-validation" novalidate>
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Informazioni Accoppiamento</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="female_id" class="form-label">Femmina <span class="text-danger">*</span></label>
+                        {% if dog and dog.gender == 'Female' %}
+                        <input type="hidden" name="female_id" value="{{ dog.id }}">
+                        <input type="text" class="form-control" value="{{ dog.name }}" readonly>
+                        {% else %}
+                        <select class="form-select" id="female_id" name="female_id" required>
+                            <option value="">Seleziona una femmina</option>
+                            {% for female_dog in female_dogs %}
+                            <option value="{{ female_dog.id }}" {% if mating and mating.female_id == female_dog.id %}selected{% endif %}>{{ female_dog.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Seleziona una femmina.</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="male_id" class="form-label">Maschio <span class="text-danger">*</span></label>
+                        {% if dog and dog.gender == 'Male' %}
+                        <input type="hidden" name="male_id" value="{{ dog.id }}">
+                        <input type="text" class="form-control" value="{{ dog.name }}" readonly>
+                        {% else %}
+                        <select class="form-select" id="male_id" name="male_id" required>
+                            <option value="">Seleziona un maschio</option>
+                            {% for male_dog in male_dogs %}
+                            <option value="{{ male_dog.id }}" {% if mating and mating.male_id == male_dog.id %}selected{% endif %}>{{ male_dog.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Seleziona un maschio.</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="date" class="form-label">Data Accoppiamento <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="date" name="date" value="{{ mating.date.strftime('%Y-%m-%d') if mating and mating.date else '' }}" required>
+                        <div class="invalid-feedback">Inserisci una data di accoppiamento.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="type" class="form-label">Tipo Accoppiamento <span class="text-danger">*</span></label>
+                        <select class="form-select" id="type" name="type" required>
+                            <option value="">Seleziona tipo</option>
+                            <option value="natural" {% if mating and mating.type == 'natural' %}selected{% endif %}>Naturale</option>
+                            <option value="artificial" {% if mating and mating.type == 'artificial' %}selected{% endif %}>Artificiale</option>
+                        </select>
+                        <div class="invalid-feedback">Seleziona un tipo di accoppiamento.</div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Note</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="3">{{ mating.notes if mating else '' }}</textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+            {% if dog %}
+            <a href="{{ url_for('dog_details', id=dog.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Torna al Cane
+            </a>
+            {% else %}
+            <a href="{{ url_for('mating_list') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Annulla
+            </a>
+            {% endif %}
+            
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save me-2"></i> {% if mating %}Aggiorna{% else %}Salva{% endif %} Accoppiamento
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

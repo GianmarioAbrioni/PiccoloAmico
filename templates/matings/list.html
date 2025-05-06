@@ -1,0 +1,136 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1><i class="fas fa-venus-mars me-2"></i> Accoppiamenti</h1>
+        <p class="lead">Gestisci tutti gli eventi di accoppiamento</p>
+    </div>
+    <a href="{{ url_for('mating_new') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i> Aggiungi Nuovo Accoppiamento
+    </a>
+</div>
+
+<!-- Search and filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form id="filter-form" action="{{ url_for('mating_list') }}" method="get" class="row g-3">
+            <!-- Search box - full width on small screens, 1/3 on medium+ -->
+            <div class="col-12 col-md-4 col-lg-2">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="search" name="search" placeholder="Cerca per nome cane..." value="{{ search }}">
+                </div>
+            </div>
+            
+            <!-- Microchip filter -->
+            <div class="col-12 col-md-4 col-lg-2">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-microchip"></i></span>
+                    <input type="text" class="form-control" id="microchip" name="microchip" placeholder="Microchip" value="{{ request.args.get('microchip', '') }}">
+                </div>
+            </div>
+            
+            <!-- Breed filter -->
+            <div class="col-12 col-md-4 col-lg-2">
+                <select class="form-select" id="breed" name="breed">
+                    <option value="">Tutte le Razze</option>
+                    <option value="Chihuahua" {% if request.args.get('breed') == 'Chihuahua' %}selected{% endif %}>Chihuahua</option>
+                    <option value="Yorkshire" {% if request.args.get('breed') == 'Yorkshire' %}selected{% endif %}>Yorkshire</option>
+                    <option value="Spitz Pomerania" {% if request.args.get('breed') == 'Spitz Pomerania' %}selected{% endif %}>Spitz Pomerania</option>
+                </select>
+            </div>
+            
+            <!-- Date range - stack on small screens, side by side on medium+ -->
+            <div class="col-6 col-md-3 col-lg-1">
+                <div class="input-group">
+                    <span class="input-group-text">Da</span>
+                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date.strftime('%Y-%m-%d') if start_date else '' }}">
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-lg-1">
+                <div class="input-group">
+                    <span class="input-group-text">A</span>
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date.strftime('%Y-%m-%d') if end_date else '' }}">
+                </div>
+            </div>
+            
+            <!-- Type selector - full width on extra small, 1/2 on small, 1/3 on medium -->
+            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <select class="form-select" id="type" name="type">
+                    <option value="">Tutti i Tipi</option>
+                    <option value="natural" {% if mating_type == 'natural' %}selected{% endif %}>Naturale</option>
+                    <option value="artificial" {% if mating_type == 'artificial' %}selected{% endif %}>Artificiale</option>
+                </select>
+            </div>
+            
+            <!-- Action buttons - horizontal on all screens, full width on extra small -->
+            <div class="col-6 col-md-3 col-lg-1">
+                <button type="submit" class="btn btn-primary w-100">Filtra</button>
+            </div>
+            <div class="col-6 col-md-3 col-lg-1">
+                <a href="{{ url_for('mating_list') }}" class="btn btn-outline-secondary w-100">Cancella</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Matings list -->
+<div class="card">
+    <div class="card-body p-0">
+        {% if matings %}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Femmina</th>
+                        <th>Maschio</th>
+                        <th>Tipo</th>
+                        <th>Note</th>
+                        <th class="text-center">Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mating in matings %}
+                    <tr>
+                        <td>{{ mating.date|date }}</td>
+                        <td>
+                            <a href="{{ url_for('dog_details', id=mating.female.id) }}" class="d-inline-block" style="word-break: break-word; max-width: 100%;">
+                                {{ mating.female.name }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('dog_details', id=mating.male.id) }}" class="d-inline-block" style="word-break: break-word; max-width: 100%;">
+                                {{ mating.male.name }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge {% if mating.type == 'natural' %}bg-success{% else %}bg-info{% endif %}">
+                                {{ mating.type|mating_type|truncate(3, true, '') }}
+                            </span>
+                        </td>
+                        <td class="text-truncate">{{ mating.notes|default('') }}</td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('mating_edit', id=mating.id) }}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-danger btn-sm delete-btn" data-action="{{ url_for('mating_delete', id=mating.id) }}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted mb-0">Nessun accoppiamento trovato con i criteri specificati.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

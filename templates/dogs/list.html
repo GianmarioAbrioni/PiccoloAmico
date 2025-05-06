@@ -1,0 +1,155 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1><i class="fas fa-dog me-2"></i> Cani</h1>
+        <p class="lead">Gestisci tutti i cani dell'allevamento</p>
+    </div>
+    <a href="{{ url_for('dog_new') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i> Aggiungi Nuovo Cane
+    </a>
+</div>
+
+<!-- Search and filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form id="filter-form" action="{{ url_for('dog_list') }}" method="get" class="row g-3">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="search" name="search" placeholder="Cerca per nome..." value="{{ search }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-microchip"></i></span>
+                    <input type="text" class="form-control" id="microchip" name="microchip" placeholder="Microchip" value="{{ request.args.get('microchip', '') }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="breed" name="breed">
+                    <option value="">Tutte le Razze</option>
+                    <option value="Chihuahua" {% if request.args.get('breed') == 'Chihuahua' %}selected{% endif %}>Chihuahua</option>
+                    <option value="Yorkshire" {% if request.args.get('breed') == 'Yorkshire' %}selected{% endif %}>Yorkshire</option>
+                    <option value="Spitz Pomerania" {% if request.args.get('breed') == 'Spitz Pomerania' %}selected{% endif %}>Spitz Pomerania</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" id="breeding" name="breeding">
+                    <option value="">Stato Riproduzione</option>
+                    <option value="true" {% if request.args.get('breeding') == 'true' %}selected{% endif %}>In Riproduzione</option>
+                    <option value="false" {% if request.args.get('breeding') == 'false' %}selected{% endif %}>Non in Riproduzione</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <select class="form-select" id="sold" name="sold">
+                    <option value="">Vendita</option>
+                    <option value="true" {% if request.args.get('sold') == 'true' %}selected{% endif %}>Venduto</option>
+                    <option value="false" {% if request.args.get('sold') == 'false' %}selected{% endif %}>Non Venduto</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <select class="form-select" id="box" name="box">
+                    <option value="">Box</option>
+                    {% for i in range(1, 17) %}
+                    <option value="Box {{ i }}" {% if request.args.get('box') == 'Box ' + i|string %}selected{% endif %}>{{ i }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1">
+                <select class="form-select" id="is_out" name="is_out">
+                    <option value="">Presenza</option>
+                    <option value="true" {% if request.args.get('is_out') == 'true' %}selected{% endif %}>Fuori</option>
+                    <option value="false" {% if request.args.get('is_out') == 'false' %}selected{% endif %}>Presente</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary w-100">Filtra</button>
+            </div>
+            <div class="col-md-1">
+                <a href="{{ url_for('dog_list') }}" class="btn btn-outline-secondary w-100">Cancella</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Dogs list -->
+{% if dogs %}
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for dog in dogs %}
+    <div class="col">
+        <div class="card dog-card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    {{ dog.name }}
+                    {% if dog.microchip_number %}
+                    <span class="badge bg-info text-white ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Microchip">
+                        <i class="fas fa-microchip"></i>
+                    </span>
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Razza:</strong> {{ dog.breed }}<br>
+                    <strong>Genere:</strong> {{ dog.gender }}<br>
+                    <strong>Nascita:</strong> {{ dog.birth_date|date }}<br>
+                    <strong>Età:</strong> {{ dog.birth_date|calculate_age }} anni
+                    {% if dog.box %}
+                    <br><strong>Box:</strong> {{ dog.box }}
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    {% if dog.sold %}
+                    <span class="badge bg-danger">Venduto</span>
+                    {% endif %}
+                    
+                    {% if dog.in_breeding %}
+                    <span class="badge bg-success">In Riproduzione</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Non in Riproduzione</span>
+                    {% endif %}
+                    
+                    {% if dog.coat %}
+                    <span class="badge bg-info">{{ dog.coat }}</span>
+                    {% endif %}
+                    
+                    {% if dog.is_out %}
+                    <span class="badge bg-warning">Fuori Struttura</span>
+                    {% endif %}
+                </div>
+                
+                {% if dog.mother or dog.father %}
+                <div class="small">
+                    {% if dog.mother %}
+                    <div><strong>Madre:</strong> <a href="{{ url_for('dog_details', id=dog.mother.id) }}">{{ dog.mother.name }}</a></div>
+                    {% endif %}
+                    
+                    {% if dog.father %}
+                    <div><strong>Padre:</strong> <a href="{{ url_for('dog_details', id=dog.father.id) }}">{{ dog.father.name }}</a></div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <div class="btn-group w-100">
+                    <a href="{{ url_for('dog_details', id=dog.id) }}" class="btn btn-info">
+                        <i class="fas fa-eye me-1"></i> Dettagli
+                    </a>
+                    <a href="{{ url_for('dog_edit', id=dog.id) }}" class="btn btn-warning">
+                        <i class="fas fa-edit me-1"></i> Modifica
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info text-center" role="alert">
+    <i class="fas fa-info-circle me-2"></i> Nessun cane trovato con i criteri specificati.
+</div>
+{% endif %}
+{% endblock %}

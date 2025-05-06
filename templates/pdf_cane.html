@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Dettagli Cane - {{ dog.name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #666;
+            padding-bottom: 10px;
+        }
+        .dog-info {
+            margin-bottom: 30px;
+        }
+        .dog-info h2 {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .info-table td, .info-table th {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        .info-table th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+        .events-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .events-table th, .events-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .events-table th {
+            background-color: #f2f2f2;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status-breeding {
+            background-color: #c8e6c9;
+            color: #388e3c;
+        }
+        .status-sold {
+            background-color: #ffcdd2;
+            color: #c62828;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Scheda Dettagliata - {{ dog.name }}</h1>
+        <p>Piccolo Amico - Gestione Allevamento Cani</p>
+        <p>Data stampa: {{ now.strftime('%d/%m/%Y %H:%M') }}</p>
+    </div>
+    
+    <div class="dog-info">
+        <h2>Informazioni di Base</h2>
+        <table class="info-table">
+            <tr>
+                <th>Nome</th>
+                <td>{{ dog.name }}</td>
+                <th>Razza</th>
+                <td>{{ dog.breed }}</td>
+            </tr>
+            <tr>
+                <th>Data di nascita</th>
+                <td>{{ dog.birth_date|date }}</td>
+                <th>Età</th>
+                <td>{{ dog.birth_date|calculate_age }} anni</td>
+            </tr>
+            <tr>
+                <th>Genere</th>
+                <td>{{ dog.gender }}</td>
+                <th>Mantello</th>
+                <td>{{ dog.coat }}</td>
+            </tr>
+            <tr>
+                <th>Microchip</th>
+                <td>
+                    {% if dog.microchip_number %}
+                    {{ dog.microchip_number }} ({{ dog.microchip_date|date }})
+                    {% else %}
+                    Non microcippato
+                    {% endif %}
+                </td>
+                <th>Stato</th>
+                <td>
+                    {% if dog.in_breeding %}
+                    <span class="status status-breeding">In riproduzione</span>
+                    {% endif %}
+                    {% if dog.sold %}
+                    <span class="status status-sold">Venduto ({{ dog.sold_date|date }})</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    {% if dog.mother or dog.father %}
+    <div class="dog-info">
+        <h2>Genealogia</h2>
+        <table class="info-table">
+            <tr>
+                <th>Madre</th>
+                <td>{{ dog.mother.name if dog.mother else "Non registrata" }}</td>
+                <th>Padre</th>
+                <td>{{ dog.father.name if dog.father else "Non registrato" }}</td>
+            </tr>
+        </table>
+    </div>
+    {% endif %}
+    
+    {% if vaccinations %}
+    <div class="dog-info">
+        <h2>Vaccinazioni</h2>
+        <table class="events-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vaccination in vaccinations %}
+                <tr>
+                    <td>{{ vaccination.date|date }}</td>
+                    <td>{{ vaccination.type }}</td>
+                    <td>{{ vaccination.notes }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    {% if dog.gender == 'Female' and births %}
+    <div class="dog-info">
+        <h2>Nascite</h2>
+        <table class="events-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Cuccioli</th>
+                    <th>Maschi/Femmine</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for birth in births %}
+                <tr>
+                    <td>{{ birth.date|date }}</td>
+                    <td>{% if birth.type == 'natural' %}Naturale{% else %}Cesareo{% endif %}</td>
+                    <td>{{ birth.puppies_count }}</td>
+                    <td>{{ birth.male_count }}/{{ birth.female_count }}</td>
+                    <td>{{ birth.notes }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    {% if matings %}
+    <div class="dog-info">
+        <h2>Accoppiamenti</h2>
+        <table class="events-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    {% if dog.gender == 'Female' %}
+                    <th>Maschio</th>
+                    {% else %}
+                    <th>Femmina</th>
+                    {% endif %}
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mating in matings %}
+                <tr>
+                    <td>{{ mating.date|date }}</td>
+                    <td>{% if mating.type == 'natural' %}Naturale{% else %}Artificiale{% endif %}</td>
+                    {% if dog.gender == 'Female' %}
+                    <td>{{ mating.male.name }}</td>
+                    {% else %}
+                    <td>{{ mating.female.name }}</td>
+                    {% endif %}
+                    <td>{{ mating.notes }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    {% if offspring %}
+    <div class="dog-info">
+        <h2>Progenie</h2>
+        <table class="events-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Data di nascita</th>
+                    <th>Genere</th>
+                    <th>Stato</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for puppy in offspring %}
+                <tr>
+                    <td>{{ puppy.name }}</td>
+                    <td>{{ puppy.birth_date|date }}</td>
+                    <td>{{ puppy.gender }}</td>
+                    <td>
+                        {% if puppy.sold %}
+                        Venduto
+                        {% elif puppy.in_breeding %}
+                        In riproduzione
+                        {% else %}
+                        Disponibile
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    {% if dog.notes %}
+    <div class="dog-info">
+        <h2>Note</h2>
+        <p>{{ dog.notes }}</p>
+    </div>
+    {% endif %}
+    
+    <div class="footer">
+        <p>Documento generato automaticamente da Piccolo Amico - Gestione Allevamento Cani</p>
+    </div>
+</body>
+</html>

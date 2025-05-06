@@ -1,0 +1,498 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1><i class="fas fa-chart-bar me-2"></i> Statistiche Allevamento</h1>
+        <p class="lead">Statistiche generali dell'allevamento</p>
+    </div>
+    <div class="btn-group">
+        <a href="{{ url_for('statistics_filtered') }}" class="btn btn-primary">
+            <i class="fas fa-filter me-2"></i> Filtra Statistiche
+        </a>
+        <a href="{{ url_for('statistics_by_category') }}" class="btn btn-primary">
+            <i class="fas fa-th-large me-2"></i> Statistiche per Categoria
+        </a>
+        <a href="{{ url_for('export_events') }}" class="btn btn-success">
+            <i class="fas fa-file-excel me-2"></i> Esporta in Excel
+        </a>
+        <a href="{{ url_for('backup_database') }}" class="btn btn-info">
+            <i class="fas fa-database me-2"></i> Backup Database
+        </a>
+    </div>
+</div>
+
+<!-- Filter Form Card -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Filtra Statistiche per Intervallo di Date</h5>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('statistics_filtered') }}" method="get" class="row g-3">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text">Data Inizio</span>
+                    <input type="date" class="form-control" id="start_date" name="start_date" required>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text">Data Fine</span>
+                    <input type="date" class="form-control" id="end_date" name="end_date" required>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filtra</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Overview Stats -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card stats-card bg-primary bg-opacity-25 text-white h-100">
+            <div class="card-body text-center">
+                <h1 class="display-4">{{ total_dogs }}</h1>
+                <h5>Totale Cani</h5>
+                <i class="fas fa-dog fa-2x mt-2"></i>
+            </div>
+            <div class="card-footer">
+                <div class="text-center">
+                    <span class="badge bg-light text-dark me-2">Maschi: {{ male_dogs }}</span>
+                    <span class="badge bg-light text-dark">Femmine: {{ female_dogs }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card stats-card bg-success bg-opacity-25 text-white h-100">
+            <div class="card-body text-center">
+                <h1 class="display-4">{{ active_breeding }}</h1>
+                <h5>In Riproduzione</h5>
+                <i class="fas fa-award fa-2x mt-2"></i>
+            </div>
+            <div class="card-footer">
+                <div class="text-center">
+                    <span class="badge bg-light text-dark">Venduti: {{ sold_dogs }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card stats-card bg-info bg-opacity-25 text-white h-100">
+            <div class="card-body text-center">
+                <h1 class="display-4">{{ total_vaccinations }}</h1>
+                <h5>Vaccinazioni</h5>
+                <i class="fas fa-syringe fa-2x mt-2"></i>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('vaccination_list') }}" class="btn btn-outline-light btn-sm w-100">Vedi Dettagli</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card stats-card bg-warning bg-opacity-25 text-white h-100">
+            <div class="card-body text-center">
+                <h1 class="display-4">{{ total_matings }}</h1>
+                <h5>Accoppiamenti</h5>
+                <i class="fas fa-venus-mars fa-2x mt-2"></i>
+            </div>
+            <div class="card-footer">
+                <div class="text-center">
+                    <span class="badge bg-light text-dark me-2">Naturali: {{ natural_matings }}</span>
+                    <span class="badge bg-light text-dark">Artificiali: {{ artificial_matings }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Birth and Puppies Stats -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="card stats-card bg-danger bg-opacity-25 text-white h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Statistiche Nascite</h5>
+            </div>
+            <div class="card-body text-center">
+                <h1 class="display-4">{{ total_births }}</h1>
+                <h5>Totale Nascite</h5>
+                <div class="mt-3">
+                    <span class="badge bg-success me-2">Naturali: {{ natural_births }}</span>
+                    <span class="badge bg-warning">Cesareo: {{ cesarean_births }}</span>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('birth_list') }}" class="btn btn-outline-light btn-sm w-100">Vedi Tutte le Nascite</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-3">
+        <div class="card stats-card bg-secondary bg-opacity-25 text-white h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Statistiche Cuccioli</h5>
+            </div>
+            <div class="card-body text-center">
+                <h1 class="display-4">{{ total_puppies }}</h1>
+                <h5>Totale Cuccioli</h5>
+                <div class="mt-3">
+                    <span class="badge bg-primary me-2">Maschi: {{ total_males }}</span>
+                    <span class="badge bg-danger">Femmine: {{ total_females }}</span>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="text-center">
+                    <small class="text-white">Media: {{ (total_puppies / total_births)|round(1) if total_births > 0 else 0 }} cuccioli per nascita</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Breed Specific Statistics -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Statistiche per Razza</h5>
+    </div>
+    <div class="card-body">
+        <!-- Tabs for different statistics -->
+        <ul class="nav nav-tabs mb-3" id="breedStats" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="dogs-tab" data-bs-toggle="tab" data-bs-target="#dogs" type="button" role="tab" aria-controls="dogs" aria-selected="true">Cani</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="vaccinations-tab" data-bs-toggle="tab" data-bs-target="#vaccinations" type="button" role="tab" aria-controls="vaccinations" aria-selected="false">Vaccinazioni</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="matings-tab" data-bs-toggle="tab" data-bs-target="#matings" type="button" role="tab" aria-controls="matings" aria-selected="false">Accoppiamenti</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="birth-types-tab" data-bs-toggle="tab" data-bs-target="#birth-types" type="button" role="tab" aria-controls="birth-types" aria-selected="false">Parti</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="births-tab" data-bs-toggle="tab" data-bs-target="#births" type="button" role="tab" aria-controls="births" aria-selected="false">Cuccioli</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="breedStatsContent">
+            <!-- Dogs Tab -->
+            <div class="tab-pane fade show active" id="dogs" role="tabpanel" aria-labelledby="dogs-tab">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Razza</th>
+                                <th class="text-center">Totale</th>
+                                <th class="text-center">Maschi</th>
+                                <th class="text-center">Femmine</th>
+                                <th class="text-center">In Riproduzione</th>
+                                <th class="text-center">Venduti</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for breed in breeds %}
+                            <tr>
+                                <td>{{ breed }}</td>
+                                <td class="text-center">{{ breed_stats[breed].total }}</td>
+                                <td class="text-center">{{ breed_stats[breed].males }}</td>
+                                <td class="text-center">{{ breed_stats[breed].females }}</td>
+                                <td class="text-center">{{ breed_stats[breed].breeding }}</td>
+                                <td class="text-center">{{ breed_stats[breed].sold }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="table-dark">
+                                <td><strong>TOTALE</strong></td>
+                                <td class="text-center"><strong>{{ total_dogs }}</strong></td>
+                                <td class="text-center"><strong>{{ male_dogs }}</strong></td>
+                                <td class="text-center"><strong>{{ female_dogs }}</strong></td>
+                                <td class="text-center"><strong>{{ active_breeding }}</strong></td>
+                                <td class="text-center"><strong>{{ sold_dogs }}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Vaccinations Tab -->
+            <div class="tab-pane fade" id="vaccinations" role="tabpanel" aria-labelledby="vaccinations-tab">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Razza</th>
+                                <th class="text-center">Vaccinazioni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for breed in breeds %}
+                            <tr>
+                                <td>{{ breed }}</td>
+                                <td class="text-center">{{ breed_stats[breed].vaccinations }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="table-dark">
+                                <td><strong>TOTALE</strong></td>
+                                <td class="text-center"><strong>{{ total_vaccinations }}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Matings Tab -->
+            <div class="tab-pane fade" id="matings" role="tabpanel" aria-labelledby="matings-tab">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Razza</th>
+                                <th class="text-center">Totale</th>
+                                <th class="text-center">Naturali</th>
+                                <th class="text-center">Artificiali</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for breed in breeds %}
+                            <tr>
+                                <td>{{ breed }}</td>
+                                <td class="text-center">{{ breed_stats[breed].matings.total }}</td>
+                                <td class="text-center">{{ breed_stats[breed].matings.natural }}</td>
+                                <td class="text-center">{{ breed_stats[breed].matings.artificial }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="table-dark">
+                                <td><strong>TOTALE</strong></td>
+                                <td class="text-center"><strong>{{ total_matings }}</strong></td>
+                                <td class="text-center"><strong>{{ natural_matings }}</strong></td>
+                                <td class="text-center"><strong>{{ artificial_matings }}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Birth Types Tab (Parti - Naturali/Cesarei) -->
+            <div class="tab-pane fade" id="birth-types" role="tabpanel" aria-labelledby="birth-types-tab">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Razza</th>
+                                <th class="text-center">Totale</th>
+                                <th class="text-center">Naturali</th>
+                                <th class="text-center">Cesarei</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for breed in breeds %}
+                            <tr>
+                                <td>{{ breed }}</td>
+                                <td class="text-center">{{ breed_stats[breed].births.total }}</td>
+                                <td class="text-center">{{ breed_stats[breed].births.natural }}</td>
+                                <td class="text-center">{{ breed_stats[breed].births.cesarean }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="table-dark">
+                                <td><strong>TOTALE</strong></td>
+                                <td class="text-center"><strong>{{ total_births }}</strong></td>
+                                <td class="text-center"><strong>{{ natural_births }}</strong></td>
+                                <td class="text-center"><strong>{{ cesarean_births }}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Births and Puppies Tab -->
+            <div class="tab-pane fade" id="births" role="tabpanel" aria-labelledby="births-tab">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Razza</th>
+                                <th class="text-center">Nascite</th>
+                                <th class="text-center">Cuccioli</th>
+                                <th class="text-center">Maschi</th>
+                                <th class="text-center">Femmine</th>
+                                <th class="text-center">Media</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for breed in breeds %}
+                            <tr>
+                                <td>{{ breed }}</td>
+                                <td class="text-center">{{ breed_stats[breed].births.total }}</td>
+                                <td class="text-center">{{ breed_stats[breed].puppies.total }}</td>
+                                <td class="text-center">{{ breed_stats[breed].puppies.males }}</td>
+                                <td class="text-center">{{ breed_stats[breed].puppies.females }}</td>
+                                <td class="text-center">{{ (breed_stats[breed].puppies.total / breed_stats[breed].births.total)|round(1) if breed_stats[breed].births.total > 0 else 0 }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="table-dark">
+                                <td><strong>TOTALE</strong></td>
+                                <td class="text-center"><strong>{{ total_births }}</strong></td>
+                                <td class="text-center"><strong>{{ total_puppies }}</strong></td>
+                                <td class="text-center"><strong>{{ total_males }}</strong></td>
+                                <td class="text-center"><strong>{{ total_females }}</strong></td>
+                                <td class="text-center"><strong>{{ (total_puppies / total_births)|round(1) if total_births > 0 else 0 }}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Statistiche Annuali</h5>
+    </div>
+    <div class="card-body">
+        <div id="yearly-stats-data" data-stats="{{ yearly_stats|tojson }}" style="display: none;"></div>
+        <canvas id="yearly-stats-chart" height="300"></canvas>
+    </div>
+</div>
+
+<!-- Yearly Stats Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Dati Annuali</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Anno</th>
+                        <th>Accoppiamenti</th>
+                        <th>Nascite</th>
+                        <th>Cuccioli</th>
+                        <th>Media Cuccioli/Nascita</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in yearly_stats %}
+                    <tr>
+                        <td>{{ stat.year }}</td>
+                        <td>{{ stat.matings }}</td>
+                        <td>{{ stat.births }}</td>
+                        <td>{{ stat.puppies }}</td>
+                        <td>{{ (stat.puppies / stat.births)|round(1) if stat.births > 0 else 0 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Entrate e Uscite Storico -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i> Statistiche Uscite e Rientri</h5>
+        <div class="stats-badges">
+            <span class="badge bg-primary me-2">Uscite: {{ outs|default(0) }}</span>
+            <span class="badge bg-success">Rientri: {{ returns|default(0) }}</span>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Tabs per diverse visualizzazioni -->
+        <ul class="nav nav-tabs mb-3" id="outLogsTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="recent-logs-tab" data-bs-toggle="tab" data-bs-target="#recent-logs" type="button" role="tab" aria-controls="recent-logs" aria-selected="true">Movimenti Recenti</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="false">Riepilogo</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="outLogsTabsContent">
+            <!-- Tab Movimenti Recenti -->
+            <div class="tab-pane fade show active" id="recent-logs" role="tabpanel" aria-labelledby="recent-logs-tab">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Cane</th>
+                                <th>Evento</th>
+                                <th>Note</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_movements %}
+                                {% for log in recent_movements %}
+                                <tr>
+                                    <td>{{ log.date|date }}</td>
+                                    <td>
+                                        <a href="{{ url_for('dog_details', id=log.dog_id) }}">{{ log.dog.name }}</a>
+                                        <span class="badge bg-secondary">{{ log.dog.breed }}</span>
+                                    </td>
+                                    <td>
+                                        {% if log.action == 'out' %}
+                                        <span class="badge bg-warning">Uscita</span>
+                                        {% if log.expected_return_date %}
+                                        <small class="text-muted">Rientro previsto: {{ log.expected_return_date|date }}</small>
+                                        {% endif %}
+                                        {% else %}
+                                        <span class="badge bg-success">Rientro</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ log.notes }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-3">Nessun movimento registrato nel periodo selezionato</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Tab Riepilogo -->
+            <div class="tab-pane fade" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+                <table class="table table-bordered mt-3">
+                    <thead>
+                        <tr class="table-primary">
+                            <th colspan="3" class="text-center">
+                                Riepilogo Movimenti dal {{ start_date|date }} al {{ end_date|date }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="table-light">
+                            <td class="text-center">
+                                <strong>Totale Movimenti</strong>
+                                <div class="display-6 mt-2">{{ total_movements|default(0) }}</div>
+                            </td>
+                            <td class="text-center">
+                                <strong>Uscite</strong>
+                                <div class="display-6 mt-2 text-warning">{{ outs|default(0) }}</div>
+                            </td>
+                            <td class="text-center">
+                                <strong>Rientri</strong>
+                                <div class="display-6 mt-2 text-success">{{ returns|default(0) }}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">
+                                Dati relativi al periodo specificato. 
+                                Utilizza il filtro date per modificare il periodo di analisi.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

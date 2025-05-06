@@ -1,0 +1,152 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1>
+        <i class="fas fa-baby me-2"></i>
+        {% if birth %}Modifica Nascita{% else %}Aggiungi Nuova Nascita{% endif %}
+    </h1>
+</div>
+
+<div class="form-container">
+    <form method="POST" class="needs-validation" id="birth-form" novalidate>
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Informazioni Nascita</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="mother_id" class="form-label">Madre <span class="text-danger">*</span></label>
+                        {% if dog and dog.gender == 'Female' %}
+                        <input type="hidden" name="mother_id" value="{{ dog.id }}">
+                        <input type="text" class="form-control" value="{{ dog.name }}" readonly>
+                        {% else %}
+                        <select class="form-select" id="mother_id" name="mother_id" required>
+                            <option value="">Seleziona una madre</option>
+                            {% for female_dog in female_dogs %}
+                            <option value="{{ female_dog.id }}" {% if birth and birth.mother_id == female_dog.id %}selected{% endif %}>{{ female_dog.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Seleziona una madre.</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="mating_id" class="form-label">Accoppiamento Relativo</label>
+                        <select class="form-select" id="mating_id" name="mating_id">
+                            <option value="">Seleziona un accoppiamento (opzionale)</option>
+                            {% for mating in available_matings %}
+                            <option value="{{ mating.id }}" {% if birth and birth.mating_id == mating.id %}selected{% endif %}>
+                                {{ mating.date|date }} con {{ mating.male.name }} ({{ mating.type }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="date" class="form-label">Data Nascita <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="date" name="date" 
+                               value="{{ birth.date.strftime('%Y-%m-%d') if birth and birth.date else '' }}" required>
+                        <div class="invalid-feedback">Inserisci una data di nascita.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="type" class="form-label">Tipo Nascita <span class="text-danger">*</span></label>
+                        <select class="form-select" id="type" name="type" required>
+                            <option value="">Seleziona tipo</option>
+                            <option value="natural" {% if birth and birth.type == 'natural' %}selected{% endif %}>Naturale</option>
+                            <option value="cesarean" {% if birth and birth.type == 'cesarean' %}selected{% endif %}>Cesareo</option>
+                        </select>
+                        <div class="invalid-feedback">Seleziona un tipo di nascita.</div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="puppies_count" class="form-label">Totale Cuccioli <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="puppies_count" name="puppies_count" 
+                               value="{{ birth.puppies_count if birth else '' }}" min="1" required>
+                        <div class="invalid-feedback">Inserisci il numero di cuccioli.</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="male_count" class="form-label">Cuccioli Maschi <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="male_count" name="male_count" 
+                               value="{{ birth.male_count if birth else '0' }}" min="0" required>
+                        <div class="invalid-feedback">Inserisci il numero di cuccioli maschi.</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="female_count" class="form-label">Cuccioli Femmine <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="female_count" name="female_count" 
+                               value="{{ birth.female_count if birth else '0' }}" min="0" required>
+                        <div class="invalid-feedback">Inserisci il numero di cuccioli femmine.</div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Note</label>
+                    <textarea class="form-control" id="notes" name="notes" rows="3">{{ birth.notes if birth else '' }}</textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+            {% if dog %}
+            <a href="{{ url_for('dog_details', id=dog.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Torna al Cane
+            </a>
+            {% else %}
+            <a href="{{ url_for('birth_list') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Annulla
+            </a>
+            {% endif %}
+            
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save me-2"></i> {% if birth %}Aggiorna{% else %}Salva{% endif %} Nascita
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Validate that male_count + female_count equals puppies_count
+    document.addEventListener('DOMContentLoaded', function() {
+        const birthForm = document.getElementById('birth-form');
+        if (birthForm) {
+            birthForm.addEventListener('submit', function(event) {
+                const puppiesCount = parseInt(document.getElementById('puppies_count').value, 10) || 0;
+                const maleCount = parseInt(document.getElementById('male_count').value, 10) || 0;
+                const femaleCount = parseInt(document.getElementById('female_count').value, 10) || 0;
+                
+                if (maleCount + femaleCount !== puppiesCount) {
+                    event.preventDefault();
+                    alert('La somma dei cuccioli maschi e femmine deve essere uguale al numero totale di cuccioli.');
+                }
+            });
+        }
+
+        // Update available matings when mother changes
+        const motherSelect = document.getElementById('mother_id');
+        const matingSelect = document.getElementById('mating_id');
+        
+        if (motherSelect && matingSelect) {
+            motherSelect.addEventListener('change', function() {
+                const motherId = this.value;
+                
+                // Clear current options
+                matingSelect.innerHTML = '<option value="">Seleziona un accoppiamento (opzionale)</option>';
+                
+                if (motherId) {
+                    // In a real implementation, this would fetch data from the server
+                    // Here we're just showing the UI behavior
+                    fetch(`/matings?female_id=${motherId}`)
+                        .then(response => response.json())
+                        .catch(() => {
+                            console.log('Impossibile recuperare gli accoppiamenti per la madre selezionata');
+                        });
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

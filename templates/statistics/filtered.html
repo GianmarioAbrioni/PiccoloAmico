@@ -1,0 +1,330 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1><i class="fas fa-filter me-2"></i> Statistiche Filtrate</h1>
+        <p class="lead">Statistiche dal {{ start_date|date }} al {{ end_date|date }}</p>
+    </div>
+    <a href="{{ url_for('statistics') }}" class="btn btn-secondary">
+        <i class="fas fa-chart-bar me-2"></i> Torna alle Statistiche Generali
+    </a>
+</div>
+
+<!-- Filter Form Card -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Modifica Intervallo Date</h5>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('statistics_filtered') }}" method="get" class="row g-3">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text">Data Inizio</span>
+                    <input type="date" class="form-control" id="start_date" name="start_date" 
+                           value="{{ start_date.strftime('%Y-%m-%d') if start_date else '' }}" required>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text">Data Fine</span>
+                    <input type="date" class="form-control" id="end_date" name="end_date" 
+                           value="{{ end_date.strftime('%Y-%m-%d') if end_date else '' }}" required>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Aggiorna</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Period Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card stats-card h-100">
+            <div class="card-header bg-primary bg-opacity-25 text-white">
+                <h5 class="mb-0">Cani</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <h2>{{ dogs_added }}</h2>
+                    <p class="mb-0">Nuovi cani aggiunti in questo periodo</p>
+                </div>
+                
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: 100%;" 
+                         aria-valuenow="{{ dogs_added }}" aria-valuemin="0" aria-valuemax="{{ dogs_added }}">
+                        {{ dogs_added }} Cani
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card stats-card h-100">
+            <div class="card-header bg-info bg-opacity-25 text-white">
+                <h5 class="mb-0">Vaccinazioni</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <h2>{{ vaccinations }}</h2>
+                    <p class="mb-0">Vaccinazioni in questo periodo</p>
+                </div>
+                
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar bg-info" role="progressbar" style="width: 100%;" 
+                         aria-valuenow="{{ vaccinations }}" aria-valuemin="0" aria-valuemax="{{ vaccinations }}">
+                        {{ vaccinations }} Vaccinazioni
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card stats-card h-100">
+            <div class="card-header bg-warning bg-opacity-25 text-white">
+                <h5 class="mb-0">Accoppiamenti</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <h2>{{ matings }}</h2>
+                    <p class="mb-0">Accoppiamenti in questo periodo</p>
+                </div>
+                
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar bg-warning" role="progressbar" 
+                         style="width: {{ 100 * natural_matings / matings if matings > 0 else 0 }}%;" 
+                         aria-valuenow="{{ natural_matings }}" aria-valuemin="0" aria-valuemax="{{ matings }}">
+                        {{ natural_matings }} Naturali
+                    </div>
+                    <div class="progress-bar bg-info" role="progressbar" 
+                         style="width: {{ 100 * artificial_matings / matings if matings > 0 else 0 }}%;" 
+                         aria-valuenow="{{ artificial_matings }}" aria-valuemin="0" aria-valuemax="{{ matings }}">
+                        {{ artificial_matings }} Artificiali
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Births and Puppies Stats -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="card stats-card h-100">
+            <div class="card-header bg-danger bg-opacity-25 text-white">
+                <h5 class="mb-0">Parti</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <h2>{{ births }}</h2>
+                    <p class="mb-0">Parti in questo periodo</p>
+                </div>
+                
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: {{ 100 * natural_births / births if births > 0 else 0 }}%;" 
+                         aria-valuenow="{{ natural_births }}" aria-valuemin="0" aria-valuemax="{{ births }}">
+                        {{ natural_births }} Naturali
+                    </div>
+                    <div class="progress-bar bg-warning" role="progressbar" 
+                         style="width: {{ 100 * cesarean_births / births if births > 0 else 0 }}%;" 
+                         aria-valuenow="{{ cesarean_births }}" aria-valuemin="0" aria-valuemax="{{ births }}">
+                        {{ cesarean_births }} Cesarei
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-3">
+        <div class="card stats-card h-100">
+            <div class="card-header bg-secondary bg-opacity-25 text-white">
+                <h5 class="mb-0">Cuccioli</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <h2>{{ puppies }}</h2>
+                    <p class="mb-0">Cuccioli nati in questo periodo</p>
+                </div>
+                
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar bg-primary" role="progressbar" 
+                         style="width: {{ 100 * males / puppies if puppies > 0 else 0 }}%;" 
+                         aria-valuenow="{{ males }}" aria-valuemin="0" aria-valuemax="{{ puppies }}">
+                        {{ males }} Maschi
+                    </div>
+                    <div class="progress-bar bg-danger" role="progressbar" 
+                         style="width: {{ 100 * females / puppies if puppies > 0 else 0 }}%;" 
+                         aria-valuenow="{{ females }}" aria-valuemin="0" aria-valuemax="{{ puppies }}">
+                        {{ females }} Femmine
+                    </div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <div class="card-text">
+                        Media cuccioli per parto: <strong>{{ (puppies / births)|round(1) if births > 0 else 0 }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Entrate e Uscite Statistiche -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i> Entrate e Uscite Cani</h5>
+                <div class="stats-badges">
+                    <span class="badge bg-warning me-2">Uscite: {{ outs|default(0) }}</span>
+                    <span class="badge bg-success">Rientri: {{ returns|default(0) }}</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Tabella riassuntiva semplificata -->
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr class="bg-light">
+                                <th class="text-center">Totale Movimenti</th>
+                                <th class="text-center">Uscite</th>
+                                <th class="text-center">Rientri</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center">
+                                    <h3>{{ total_movements|default(0) }}</h3>
+                                </td>
+                                <td class="text-center">
+                                    <h3 class="text-warning">{{ outs|default(0) }}</h3>
+                                </td>
+                                <td class="text-center">
+                                    <h3 class="text-success">{{ returns|default(0) }}</h3>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Lista movimenti recenti -->
+                <h5 class="mb-3">Movimenti Recenti</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Cane</th>
+                                <th>Evento</th>
+                                <th>Note</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_movements %}
+                                {% for log in recent_movements %}
+                                <tr>
+                                    <td>{{ log.date|date }}</td>
+                                    <td>
+                                        <a href="{{ url_for('dog_details', id=log.dog_id) }}">{{ log.dog.name }}</a>
+                                        <span class="badge bg-secondary">{{ log.dog.breed }}</span>
+                                    </td>
+                                    <td>
+                                        {% if log.action == 'out' %}
+                                        <span class="badge bg-warning">Uscita</span>
+                                        {% if log.expected_return_date %}
+                                        <small class="text-muted">Rientro previsto: {{ log.expected_return_date|date }}</small>
+                                        {% endif %}
+                                        {% else %}
+                                        <span class="badge bg-success">Rientro</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ log.notes }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-3">Nessun movimento registrato nel periodo selezionato</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed comparison -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Riepilogo Dettagliato Periodo</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>Metrica</th>
+                        <th>Quantità</th>
+                        <th>Dettagli</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Nuovi Cani</td>
+                        <td>{{ dogs_added }}</td>
+                        <td>Cani aggiunti tra {{ start_date|date }} e {{ end_date|date }}</td>
+                    </tr>
+                    <tr>
+                        <td>Vaccinazioni</td>
+                        <td>{{ vaccinations }}</td>
+                        <td>Tutte le vaccinazioni somministrate durante questo periodo</td>
+                    </tr>
+                    <tr>
+                        <td>Accoppiamenti</td>
+                        <td>{{ matings }}</td>
+                        <td>
+                            Naturali: {{ natural_matings }} ({{ (100 * natural_matings / matings)|round if matings > 0 else 0 }}%)<br>
+                            Artificiali: {{ artificial_matings }} ({{ (100 * artificial_matings / matings)|round if matings > 0 else 0 }}%)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Parti</td>
+                        <td>{{ births }}</td>
+                        <td>
+                            Naturali: {{ natural_births }} ({{ (100 * natural_births / births)|round if births > 0 else 0 }}%)<br>
+                            Cesarei: {{ cesarean_births }} ({{ (100 * cesarean_births / births)|round if births > 0 else 0 }}%)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Cuccioli</td>
+                        <td>{{ puppies }}</td>
+                        <td>
+                            Maschi: {{ males }} ({{ (100 * males / puppies)|round if puppies > 0 else 0 }}%)<br>
+                            Femmine: {{ females }} ({{ (100 * females / puppies)|round if puppies > 0 else 0 }}%)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Movimenti Cani</td>
+                        <td>{{ total_movements }}</td>
+                        <td>
+                            Uscite: {{ outs }} ({{ (100 * outs / total_movements)|round if total_movements > 0 else 0 }}%)<br>
+                            Rientri: {{ returns }} ({{ (100 * returns / total_movements)|round if total_movements > 0 else 0 }}%)
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-center">
+        <a href="{{ url_for('statistics') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Torna alle Statistiche Generali
+        </a>
+    </div>
+</div>
+{% endblock %}

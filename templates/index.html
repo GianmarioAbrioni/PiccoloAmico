@@ -1,0 +1,335 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-chart-line me-2"></i> Dashboard</h1>
+    <p class="lead">Benvenuto nel Sistema di Gestione Allevamento Cani Piccolo Amico</p>
+    
+    {% if db_updated %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i> Il database è stato aggiornato con successo!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    
+    <!-- Avviso di aggiornamento database - mostrato solo se si sono verificati errori -->
+    {% if 'error' in session or db_updated is not defined %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i> Si è verificato un errore nel caricamento dei dati. È necessario aggiornare il database per utilizzare tutte le funzionalità.
+        <a href="{{ url_for('update_database') }}" class="btn btn-warning btn-sm ms-3">
+            <i class="fas fa-database me-1"></i> Aggiorna Database
+        </a>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Statistics Overview -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card h-100 bg-primary bg-opacity-25 text-white">
+            <div class="card-body text-center">
+                <h1 class="display-4">{{ dog_count }}</h1>
+                <h5>Totale Cani</h5>
+                <i class="fas fa-dog fa-2x mt-2"></i>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('dog_list') }}" class="btn btn-outline-light btn-sm w-100">Visualizza Tutti</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card h-100 bg-success bg-opacity-25 text-white">
+            <div class="card-body text-center">
+                <h1 class="display-4">{{ active_breeding_count }}</h1>
+                <h5>In Riproduzione</h5>
+                <i class="fas fa-award fa-2x mt-2"></i>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('dog_list', breeding='true') }}" class="btn btn-outline-light btn-sm w-100">Visualizza Attivi</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card h-100 bg-info bg-opacity-25 text-white">
+            <div class="card-body text-center">
+                <h1 class="display-4">{{ vaccination_count }}</h1>
+                <h5>Vaccinazioni</h5>
+                <i class="fas fa-syringe fa-2x mt-2"></i>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('vaccination_list') }}" class="btn btn-outline-light btn-sm w-100">Visualizza Tutte</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card h-100 bg-warning bg-opacity-25 text-white">
+            <div class="card-body text-center">
+                <h1 class="display-4">{{ puppies_count }}</h1>
+                <h5>Totale Cuccioli</h5>
+                <i class="fas fa-baby fa-2x mt-2"></i>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('birth_list') }}" class="btn btn-outline-light btn-sm w-100">Visualizza Nascite</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Box System -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-box me-2"></i> Sistema Box</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for i in range(1, 17) %}
+            {% set box_name = 'Box ' + i|string %}
+            {% set dog_count = dogs_by_box.get(box_name, 0) %}
+            <div class="col-md-3 col-sm-4 col-6 mb-3">
+                <a href="{{ url_for('box_view', box_number=box_name) }}" 
+                   class="btn {% if dog_count > 0 %}btn-primary{% else %}btn-outline-primary{% endif %} w-100 py-3">
+                    <i class="fas fa-box me-2"></i> Box {{ i }}
+                    {% if dog_count > 0 %}
+                    <span class="badge bg-light text-primary ms-1">{{ dog_count }}</span>
+                    {% endif %}
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Cani Fuori Struttura -->
+{% if out_dogs %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-sign-out-alt me-2"></i> Cani Fuori Struttura</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Box</th>
+                        <th>Data Uscita</th>
+                        <th>Rientro Previsto</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dog in out_dogs %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('dog_details', id=dog.id) }}">{{ dog.name }}</a>
+                            <span class="badge bg-secondary ms-1">{{ dog.breed }}</span>
+                        </td>
+                        <td>{{ dog.box if dog.box else "-" }}</td>
+                        <td>{{ dog.out_date|date }}</td>
+                        <td>{{ dog.return_date|date if dog.return_date else "Non specificato" }}</td>
+                        <td>
+                            <a href="{{ url_for('toggle_out', id=dog.id) }}" class="btn btn-success btn-sm">
+                                <i class="fas fa-sign-in-alt me-1"></i> Rientro
+                            </a>
+                            <a href="{{ url_for('dog_details', id=dog.id) }}" class="btn btn-info btn-sm">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Dogs -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-dog me-2"></i> Cani Recenti</h5>
+        <a href="{{ url_for('dog_new') }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> Aggiungi Nuovo Cane
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Razza</th>
+                        <th>Data di Nascita</th>
+                        <th>Età</th>
+                        <th>Genere</th>
+                        <th>Stato</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dog in recent_dogs %}
+                    <tr>
+                        <td>{{ dog.name }}</td>
+                        <td>{{ dog.breed }}</td>
+                        <td>{{ dog.birth_date|date }}</td>
+                        <td>{{ dog.birth_date|calculate_age }} anni</td>
+                        <td>{{ dog.gender }}</td>
+                        <td>
+                            {% if dog.sold %}
+                                <span class="badge bg-danger">Venduto</span>
+                            {% elif dog.in_breeding %}
+                                <span class="badge bg-success">In Riproduzione</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Non in Riproduzione</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('dog_details', id=dog.id) }}" class="btn btn-info btn-sm">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-3">Nessun cane registrato</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-end">
+        <a href="{{ url_for('dog_list') }}" class="btn btn-outline-secondary">Visualizza Tutti i Cani</a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Vaccinations -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-syringe me-2"></i> Vaccinazioni Recenti</h5>
+                <a href="{{ url_for('vaccination_new') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i> Aggiungi
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Cane</th>
+                                <th>Tipo</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vaccination in recent_vaccinations %}
+                            <tr>
+                                <td>{{ vaccination.dog.name }}</td>
+                                <td>{{ vaccination.type }}</td>
+                                <td>{{ vaccination.date|date }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center py-3">Nessuna vaccinazione registrata</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <a href="{{ url_for('vaccination_list') }}" class="btn btn-outline-secondary">Visualizza Tutte le Vaccinazioni</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Matings and Births -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-venus-mars me-2"></i> Accoppiamenti Recenti</h5>
+                <a href="{{ url_for('mating_new') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i> Aggiungi
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Femmina</th>
+                                <th>Maschio</th>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mating in recent_matings %}
+                            <tr>
+                                <td>{{ mating.female.name }}</td>
+                                <td>{{ mating.male.name }}</td>
+                                <td>{{ mating.date|date }}</td>
+                                <td>{{ mating.type|capitalize }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-3">Nessun accoppiamento registrato</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <a href="{{ url_for('mating_list') }}" class="btn btn-outline-secondary">Visualizza Tutti gli Accoppiamenti</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-baby me-2"></i> Nascite Recenti</h5>
+                <a href="{{ url_for('birth_new') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i> Aggiungi
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Madre</th>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Cuccioli</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for birth in recent_births %}
+                            <tr>
+                                <td>{{ birth.mother.name }}</td>
+                                <td>{{ birth.date|date }}</td>
+                                <td>{{ birth.type|birth_type }}</td>
+                                <td>{{ birth.puppies_count }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-3">Nessuna nascita registrata</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <a href="{{ url_for('birth_list') }}" class="btn btn-outline-secondary">Visualizza Tutte le Nascite</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

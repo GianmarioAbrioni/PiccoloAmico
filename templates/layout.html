@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="it" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piccolo Amico - Gestione Allevamento Cani</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet">
+    
+    <!-- Chart.js for statistics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url_for('index') }}">
+                    <i class="fas fa-paw me-2"></i> Piccolo Amico
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('index') }}">
+                                <i class="fas fa-home me-1"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('dog_list') }}">
+                                <i class="fas fa-dog me-1"></i> Cani
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('vaccination_list') }}">
+                                <i class="fas fa-syringe me-1"></i> Vaccinazioni
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('mating_list') }}">
+                                <i class="fas fa-venus-mars me-1"></i> Accoppiamenti
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('birth_list') }}">
+                                <i class="fas fa-baby me-1"></i> Nascite
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('statistics') }}">
+                                <i class="fas fa-chart-bar me-1"></i> Statistiche
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('advanced_search') }}">
+                                <i class="fas fa-search me-1"></i> Ricerca Avanzata
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container py-4">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Main content -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer mt-auto py-3 bg-dark">
+        <div class="container text-center">
+            <span class="text-muted">© 2023 Piccolo Amico - Gestione Allevamento Cani</span>
+        </div>
+    </footer>
+    
+    <!-- Delete confirmation modal -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Conferma Eliminazione</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Sei sicuro di voler eliminare questo record? Questa azione non può essere annullata.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteButton">Elimina</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Chart.js for Statistics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
