@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+{% block title %}Risultati Ricerca{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Ricerca</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="card-title mb-0">
+                    {% if query %}
+                        Risultati per "{{ query }}"
+                    {% else %}
+                        Ricerca
+                    {% endif %}
+                </h3>
+                <div>
+                    <a href="/" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-left"></i> Torna alla home
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-sm-10 col-md-8 col-lg-6 mx-auto">
+                        <form action="/cerca" method="get">
+                            <div class="input-group">
+                                <input type="text" name="q" class="form-control" value="{{ query }}" placeholder="Cerca per nome o microchip">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                {% if cani %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Microchip</th>
+                                    <th>Box</th>
+                                    <th>Stato</th>
+                                    <th>Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cane in cani %}
+                                <tr>
+                                    <td><a href="/cane/{{ cane.id }}" class="text-decoration-none">{{ cane.nome }}</a></td>
+                                    <td>{{ cane.microchip or 'Non inserito' }}</td>
+                                    <td><a href="/box/{{ cane.box }}" class="text-decoration-none">{{ cane.box }}</a></td>
+                                    <td><span class="badge bg-secondary">{{ cane.stato or 'Nessuno' }}</span></td>
+                                    <td>
+                                        <a href="/cane/{{ cane.id }}" class="btn btn-sm btn-outline-primary">Dettagli</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    {% if query %}
+                        <div class="alert alert-info text-center">
+                            <i class="bi bi-info-circle me-2"></i> Nessun risultato trovato per "{{ query }}".
+                        </div>
+                    {% else %}
+                        <div class="alert alert-secondary text-center">
+                            Inserisci un termine di ricerca per trovare i cani.
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

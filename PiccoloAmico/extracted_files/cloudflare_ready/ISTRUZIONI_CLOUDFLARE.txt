@@ -1,0 +1,29 @@
+ISTRUZIONI PER COLLEGARE IL GESTIONALE AL SITO NETLIFY
+
+1. Installa Cloudflare Tunnel:
+   - Scarica cloudflared per Windows: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/installation/#windows
+   - Apri il terminale CMD come amministratore
+   - Esegui: cloudflared login
+   - Segui le istruzioni per associare il tuo account gratuito Cloudflare
+   - Crea tunnel:
+       cloudflared tunnel create gestionale-cani
+   - Crea un file di configurazione YAML nella cartella ".cloudflared" con:
+       tunnel: gestione-cani
+       credentials-file: C:/Users/TUONOME/.cloudflared/<file>.json
+       ingress:
+         - hostname: gestionale-cani.example.com
+           service: http://localhost:5000
+         - service: http_status:404
+
+   - Pubblica il tunnel:
+       cloudflared tunnel route dns gestionale-cani gestionale-cani.example.com
+
+2. Avvia il gestionale:
+   - Fai doppio clic su start_gestionale_con_tunnel.bat
+
+3. Vai sul tuo sito Netlify e modifica i file JS:
+   - In dashboard.js, lista_cani.js, scheda_cane.js
+   - Sostituisci `https://example-tunnel.io` con l’URL pubblico Cloudflare (es: https://gestionale-cani.example.com)
+
+4. Il gestionale sarà raggiungibile online da qualsiasi dispositivo!
+

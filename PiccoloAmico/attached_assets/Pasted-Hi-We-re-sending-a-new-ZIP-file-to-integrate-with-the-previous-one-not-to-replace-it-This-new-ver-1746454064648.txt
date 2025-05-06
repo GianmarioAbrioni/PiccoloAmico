@@ -1,0 +1,65 @@
+Hi! We’re sending a new ZIP file to integrate with the previous one, not to replace it. This new version includes several key features and enhancements that are essential for our dog breeding management system. Since you’re having trouble accessing the ZIP, here is a detailed breakdown of all the changes made, including database structure, routes, and templates:
+
+⸻
+
+1. Editing and Deleting Dog Records
+	•	Edit feature: On the dog detail page, we added a “Modify” button. It allows full editing of the dog’s info: name, breed, color, microchip, and box.
+	•	Delete feature: Also on the dog detail page, a “Delete” button allows safe removal of a dog from the database, with confirmation.
+	•	Database: No changes required, uses existing dogs table. Update/delete operations added via app_api.py.
+
+⸻
+
+2. Mating Events (Accoppiamenti)
+	•	New Table: mating_events
+Fields:
+	•	id (primary key)
+	•	dog_id (foreign key to dogs table)
+	•	date (date of mating)
+	•	type (string: “natural” or “artificial”)
+	•	Functionality: From the dog detail page, you can add mating events with date and type.
+	•	Edit/Delete: Each mating event can be modified or removed after creation.
+	•	Templates: New section on dog details page lists and allows management of all mating events for that dog.
+
+⸻
+
+3. Birth Events (Parti)
+	•	New Table: births
+Fields:
+	•	id (primary key)
+	•	dog_id (foreign key to dogs table)
+	•	date (birth date)
+	•	puppies_count (int)
+	•	type (string: “natural” or “cesarean”)
+	•	Functionality: From the dog detail page, you can register birth events with all required fields.
+	•	Edit/Delete: Every birth event can be edited or deleted after logging.
+	•	Templates: Integrated in dog detail view as a collapsible or full section.
+
+⸻
+
+4. Statistics Page
+
+A dedicated page was added showing:
+	•	Number of births by type (natural vs cesarean)
+	•	Mating stats by type (natural vs artificial)
+	•	Filters by:
+	•	Date range
+	•	Dog
+	•	Event type
+	•	All stats are generated with SQL queries and visualized in a clean summary layout.
+
+⸻
+
+5. Advanced Search and Filtering
+
+All new events (mating and births) are:
+	•	Fully searchable by:
+	•	Dog
+	•	Type
+	•	Date range
+	•	Results are paginated and sortable in template tables.
+
+⸻
+
+Let me know if you need specific code blocks or database schema. Everything has been tested and the UI was left untouched except for adding these features in line with the existing design.
+
+Looking forward to integrating this into the current app!

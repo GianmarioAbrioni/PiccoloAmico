@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+{% block title %}Ricerca Avanzata{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Ricerca Avanzata</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Filter panel -- mobile friendly -->
+    <div class="col-lg-4 mb-4 mobile-spacing">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">Filtri</h4>
+                <button class="btn btn-sm btn-outline-secondary d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true" aria-controls="filterCollapse">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+            </div>
+            <div class="card-body collapse show" id="filterCollapse">
+                <form method="get">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="stato" class="form-label">Stato</label>
+                            <input type="text" class="form-control" id="stato" name="stato" value="{{ stato }}" placeholder="es: in calore, incinta...">
+                            <div class="form-text">Filtra per stato del cane</div>
+                        </div>
+                        
+                        <div class="col-md-12 mb-3">
+                            <label for="box" class="form-label">Box</label>
+                            <input type="text" class="form-control" id="box" name="box" value="{{ box }}" placeholder="es: Box 1, Box 2...">
+                            <div class="form-text">Filtra per posizione del box</div>
+                        </div>
+                        
+                        <div class="col-md-12 mb-3">
+                            <label for="fuori" class="form-label">Fuori Allevamento</label>
+                            <select class="form-select" id="fuori" name="fuori">
+                                <option value="">Tutti</option>
+                                <option value="si" {% if fuori == 'si' %}selected{% endif %}>Sì</option>
+                                <option value="no" {% if fuori == 'no' %}selected{% endif %}>No</option>
+                            </select>
+                            <div class="form-text">Filtra per cani fuori allevamento</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex flex-wrap justify-content-between mt-3">
+                        <a href="/filtri" class="btn btn-outline-secondary mb-2 mb-md-0 me-md-2">
+                            <i class="bi bi-x-circle"></i> Reset
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-filter"></i> Filtra
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Results panel -->
+    <div class="col-lg-8 mobile-spacing">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">Risultati</h4>
+                <a href="/" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-arrow-left"></i> Torna alla home
+                </a>
+            </div>
+            <div class="card-body">
+    <div class="mb-3">
+        <label class="form-label">Tipo Parto</label>
+        <select name="birth_type" class="form-select">
+            <option value="">Tutti</option>
+            <option value="natural" {% if birth_type == 'natural' %}selected{% endif %}>Naturale</option>
+            <option value="cesarean" {% if birth_type == 'cesarean' %}selected{% endif %}>Cesareo</option>
+        </select>
+    </div>
+                {% if cani %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Stato</th>
+                                    <th>Box</th>
+                                    <th>Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cane in cani %}
+                                <tr>
+                                    <td><a href="/cane/{{ cane.id }}" class="text-decoration-none">{{ cane.nome }}</a></td>
+                                    <td><span class="badge bg-secondary">{{ cane.stato or 'Nessuno' }}</span></td>
+                                    <td><a href="/box/{{ cane.box }}" class="text-decoration-none">{{ cane.box }}</a></td>
+                                    <td>
+                                        <a href="/cane/{{ cane.id }}" class="btn btn-sm btn-outline-primary">Dettagli</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info text-center">
+                        <i class="bi bi-info-circle me-2"></i> Nessun cane trovato con i criteri selezionati.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

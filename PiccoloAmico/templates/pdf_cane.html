@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Scheda Cane - {{ cane.nome }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            color: #333;
+        }
+        .subtitle {
+            font-size: 16px;
+            color: #666;
+            margin: 5px 0;
+        }
+        .info-section {
+            margin-bottom: 20px;
+        }
+        .info-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .info-item {
+            margin-bottom: 10px;
+        }
+        .info-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 100px;
+        }
+        .event-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .event-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .event-date {
+            font-weight: bold;
+        }
+        .event-type {
+            color: #666;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">Scheda Cane: {{ cane.nome }}</h1>
+        <p class="subtitle">Generato il {{ now }}</p>
+    </div>
+    
+    <div class="info-section">
+        <h2 class="info-title">Informazioni Generali</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Nome:</span> {{ cane.nome }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">Razza:</span> {{ cane.razza or 'Non specificata' }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">Colore:</span> {{ cane.colore or 'Non specificato' }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">Microchip:</span> {{ cane.microchip or 'Non inserito' }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">Box:</span> {{ cane.box }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">Stato:</span> {{ cane.stato or 'Nessuno stato' }}
+            </div>
+        </div>
+    </div>
+    
+    <div class="info-section">
+        <h2 class="info-title">Storico Eventi</h2>
+        {% if eventi %}
+            <ul class="event-list">
+                {% for e in eventi %}
+                <li class="event-item">
+                    <span class="event-date">{{ e['data'] }}</span> - 
+                    <span class="event-type">{{ e['tipo'] }}:</span> 
+                    {{ e['descrizione'] }}
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Nessun evento registrato</p>
+        {% endif %}
+    </div>
+    
+    <div class="footer">
+        Gestionale Allevamento - Documento generato automaticamente
+    </div>
+</body>
+</html>

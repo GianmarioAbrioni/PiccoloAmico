@@ -1,0 +1,51 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Modifica {{ cane.nome }}</h2>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Nome</label>
+                <input type="text" class="form-control" name="nome" value="{{ cane.nome }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Razza</label>
+                <input type="text" class="form-control" name="razza" value="{{ cane.razza }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Colore</label>
+                <input type="text" class="form-control" name="colore" value="{{ cane.colore }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Box</label>
+                <input type="text" class="form-control" name="box" value="{{ cane.box }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Data di Nascita</label>
+                <input type="date" class="form-control" name="birth_date" value="{{ cane.birth_date.strftime('%Y-%m-%d') if cane.birth_date }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Numero Microchip</label>
+                <input type="text" class="form-control" name="microchip_number" value="{{ cane.microchip_number }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Data Inserimento Microchip</label>
+                <input type="date" class="form-control" name="microchip_date" value="{{ cane.microchip_date.strftime('%Y-%m-%d') if cane.microchip_date }}">
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" name="microchip_inserted" value="1" {% if cane.microchip_inserted %}checked{% endif %}>
+                <label class="form-check-label">Microchip Inserito</label>
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" name="is_sold" value="1" {% if cane.is_sold %}checked{% endif %}>
+                <label class="form-check-label">Venduto</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Salva Modifiche</button>
+            <a href="{{ url_for('dettaglio_cane', id=cane.id) }}" class="btn btn-secondary">Annulla</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

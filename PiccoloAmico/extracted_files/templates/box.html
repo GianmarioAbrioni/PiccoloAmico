@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cani nel {{ box }}</title>
+</head>
+<body>
+    <h1>Cani nel {{ box }}</h1>
+    <ul>
+        {% for cane in cani %}
+        <li><a href="/cane/{{ cane.id }}">{{ cane.nome }}</a> - Stato: {{ cane.stato }}</li>
+        {% endfor %}
+    </ul>
+    <a href="/">Torna all'elenco</a>
+</body>
+</html>

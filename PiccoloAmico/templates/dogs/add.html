@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-plus-circle me-2"></i>Add New Dog</h1>
+    <a href="{{ url_for('dogs_list') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Back to List
+    </a>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('dog_add') }}">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="breed" class="form-label">Breed <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="breed" name="breed" required>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="gender" class="form-label">Gender <span class="text-danger">*</span></label>
+                    <select class="form-select" id="gender" name="gender" required>
+                        <option value="" selected disabled>Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label for="birth_date" class="form-label">Birth Date</label>
+                    <input type="date" class="form-control" id="birth_date" name="birth_date">
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label for="registration_number" class="form-label">Registration Number</label>
+                    <input type="text" class="form-control" id="registration_number" name="registration_number">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="microchip_number" class="form-label">Microchip Number</label>
+                    <input type="text" class="form-control" id="microchip_number" name="microchip_number">
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label for="sire_id" class="form-label">Sire (Father)</label>
+                    <select class="form-select" id="sire_id" name="sire_id">
+                        <option value="">Unknown/Not Selected</option>
+                        {% for male_dog in male_dogs %}
+                        <option value="{{ male_dog.id }}">{{ male_dog.name }} - {{ male_dog.breed }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label for="dam_id" class="form-label">Dam (Mother)</label>
+                    <select class="form-select" id="dam_id" name="dam_id">
+                        <option value="">Unknown/Not Selected</option>
+                        {% for female_dog in female_dogs %}
+                        <option value="{{ female_dog.id }}">{{ female_dog.name }} - {{ female_dog.breed }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes</label>
+                <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Save Dog
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

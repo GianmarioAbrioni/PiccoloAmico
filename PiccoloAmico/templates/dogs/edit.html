@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-edit me-2"></i>Edit Dog: {{ dog.name }}</h1>
+    <div>
+        <a href="{{ url_for('dog_detail', dog_id=dog.id) }}" class="btn btn-info me-2">
+            <i class="fas fa-eye me-1"></i> View Details
+        </a>
+        <a href="{{ url_for('dogs_list') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to List
+        </a>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('dog_edit', dog_id=dog.id) }}">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ dog.name }}" required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="breed" class="form-label">Breed <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="breed" name="breed" value="{{ dog.breed }}" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="gender" class="form-label">Gender <span class="text-danger">*</span></label>
+                    <select class="form-select" id="gender" name="gender" required>
+                        <option value="Male" {% if dog.gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if dog.gender == 'Female' %}selected{% endif %}>Female</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="birth_date" class="form-label">Birth Date</label>
+                    <input type="date" class="form-control" id="birth_date" name="birth_date" 
+                        value="{{ dog.birth_date.strftime('%Y-%m-%d') if dog.birth_date else '' }}">
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="registration_number" class="form-label">Registration Number</label>
+                    <input type="text" class="form-control" id="registration_number" name="registration_number" 
+                        value="{{ dog.registration_number or '' }}">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="microchip_number" class="form-label">Microchip Number</label>
+                    <input type="text" class="form-control" id="microchip_number" name="microchip_number" 
+                        value="{{ dog.microchip_number or '' }}">
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="sire_id" class="form-label">Sire (Father)</label>
+                    <select class="form-select" id="sire_id" name="sire_id">
+                        <option value="">Unknown/Not Selected</option>
+                        {% for male_dog in male_dogs %}
+                            {% if male_dog.id != dog.id %}  <!-- Prevent selecting itself -->
+                            <option value="{{ male_dog.id }}" {% if dog.sire_id == male_dog.id %}selected{% endif %}>
+                                {{ male_dog.name }} - {{ male_dog.breed }}
+                            </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="dam_id" class="form-label">Dam (Mother)</label>
+                    <select class="form-select" id="dam_id" name="dam_id">
+                        <option value="">Unknown/Not Selected</option>
+                        {% for female_dog in female_dogs %}
+                            {% if female_dog.id != dog.id %}  <!-- Prevent selecting itself -->
+                            <option value="{{ female_dog.id }}" {% if dog.dam_id == female_dog.id %}selected{% endif %}>
+                                {{ female_dog.name }} - {{ female_dog.breed }}
+                            </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="is_active" name="is_active" 
+                       {% if dog.is_active %}checked{% endif %}>
+                <label class="form-check-label" for="is_active">Active</label>
+            </div>
+
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notes</label>
+                <textarea class="form-control" id="notes" name="notes" rows="3">{{ dog.notes or '' }}</textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="microchip_data" class="form-label">Microchip Insertion Date</label>
+                    <input type="date" class="form-control" id="microchip_data" name="microchip_data"
+                        value="{{ dog.microchip_data.strftime('%Y-%m-%d') if dog.microchip_data else '' }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="chip_inserito" class="form-label">Microchip Inserted</label>
+                    <select class="form-select" id="chip_inserito" name="chip_inserito">
+                        <option value="Yes" {% if dog.chip_inserito == 'Yes' %}selected{% endif %}>Yes</option>
+                        <option value="No" {% if dog.chip_inserito == 'No' %}selected{% endif %}>No</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="venduto" class="form-label">Sale Status</label>
+                    <select class="form-select" id="venduto" name="venduto">
+                        <option value="Yes" {% if dog.venduto == 'Yes' %}selected{% endif %}>Sold</option>
+                        <option value="No" {% if dog.venduto == 'No' %}selected{% endif %}>Not sold</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Update Dog
+                </button>
+            </div>
+        
+    <label for="father_id">Padre:</label>
+    <select name="father_id" id="father_id">
+      <option value="">-- Nessuno --</option>
+      {% for cane in all_dogs %}
+        <option value="{{ cane.id }}" {% if cane.id == dog.father_id %}selected{% endif %}>{{ cane.nome }}</option>
+      {% endfor %}
+    </select><br><br>
+
+    <label for="mother_id">Madre:</label>
+    <select name="mother_id" id="mother_id">
+      <option value="">-- Nessuna --</option>
+      {% for cane in all_dogs %}
+        <option value="{{ cane.id }}" {% if cane.id == dog.mother_id %}selected{% endif %}>{{ cane.nome }}</option>
+      {% endfor %}
+    </select><br><br>
+
+
+    <label for="microchip_implanted">Microchip Inserito:</label>
+    <input type="checkbox" name="microchip_implanted" id="microchip_implanted" {% if dog.microchip_implanted %}checked{% endif %}><br><br>
+
+    <label for="microchip_implant_date">Data Inserimento Microchip:</label>
+    <input type="date" name="microchip_implant_date" id="microchip_implant_date" value="{{ dog.microchip_implant_date }}"><br><br>
+
+</form>
+    </div>
+</div>
+{% endblock %}
+<h3>Sesso</h3>
+<select name="sesso">
+  <option value="maschio" {% if cane['sesso'] == 'maschio' %}selected{% endif %}>Maschio</option>
+  <option value="femmina" {% if cane['sesso'] == 'femmina' %}selected{% endif %}>Femmina</option>
+</select><br>
+
+<h3>Data di nascita</h3>
+<input type="date" name="data_nascita" value="{{ cane['data_nascita'] }}"><br>
+
+<h3>Fuori struttura</h3>
+<select name="fuori_struttura">
+  <option value="No" {% if cane['fuori_struttura'] == 'No' %}selected{% endif %}>No</option>
+  <option value="Sì" {% if cane['fuori_struttura'] == 'Sì' %}selected{% endif %}>Sì</option>
+</select><br>
+
+<h3>Data uscita / rientro</h3>
+<input type="date" name="data_uscita" value="{{ cane['data_uscita'] }}"><br>
+<input type="date" name="data_rientro" value="{{ cane['data_rientro'] }}"><br>

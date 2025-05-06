@@ -1,0 +1,130 @@
+Hi! Here’s the definitive and complete list of features that must be implemented in the dog breeding management system. Please make sure all of this is implemented and visible in the Replit files and UI, including the database models, routes, and templates.
+
+⸻
+
+COMPLETE FUNCTIONALITY CHECKLIST
+
+1. Dog Information
+
+Each dog must have the following fields:
+	•	name
+	•	sex (male/female)
+	•	breed
+	•	box (assigned area)
+	•	birth_date
+	•	With automatic age calculation (displayed in years and months)
+	•	microchip_number
+	•	microchip_inserted (Yes/No)
+	•	microchip_date (date of insertion)
+	•	is_sold (Yes/No)
+
+Also required:
+	•	Ability to move the dog from one box to another.
+
+⸻
+
+2. Dog Presence / Out of Facility
+
+New required functionality:
+	•	out_date (when the dog is temporarily moved outside the facility)
+	•	return_date (when the dog returns)
+	•	Field: is_out (True/False)
+
+Must be:
+	•	Editable from the edit page
+	•	Visible in the detail page
+	•	Searchable or filterable by “currently out” or not
+
+⸻
+
+3. Vaccinations
+
+Each dog can have multiple vaccinations, with:
+	•	vaccine_type
+	•	vaccine_date
+	•	notes (optional)
+
+Functionality:
+	•	Add new vaccination
+	•	Edit existing vaccination
+	•	Delete vaccination
+	•	Display vaccination history on the dog’s detail page
+
+⸻
+
+4. Mating Events
+
+Each dog (usually females or breeding males) can have:
+	•	mating_date
+	•	mating_type (natural/artificial)
+
+Full CRUD:
+	•	Add, edit, delete mating events
+	•	View all events on the detail page
+
+⸻
+
+5. Births (Parti)
+
+This is a core feature and must include:
+	•	birth_date
+	•	birth_type (cesarean/natural)
+	•	puppy_count
+	•	notes
+
+Functionality:
+	•	Add, edit, delete birth records
+	•	View all births per dog in the detail page
+
+Plus global statistics:
+	•	Total births
+	•	Births per dog
+	•	Count and percentage of cesareans vs natural
+	•	Filters by date range, dog, birth type
+
+⸻
+
+6. Pages and UI Integration
+
+The following pages must include all this data:
+	•	/dogs: list of all dogs, with summary (name, age, sex, box, sold status)
+	•	/dogs/<id>: dog detail page
+	•	All sections: info, microchip, sale status, out/in status, vaccinations, mating, births
+	•	/dogs/<id>/edit: edit all fields
+	•	Vaccination, mating and birth records should have tabs or collapsible sections
+
+⸻
+
+7. Technical Requirements
+
+Models (Database):
+	•	Dog: all fields listed above
+	•	Vaccination: linked to dog, with type, date, notes
+	•	Mating: linked to dog, with date and type
+	•	Birth: linked to dog, with date, type, number of puppies
+	•	(Optional) EventLog: for tracking history
+
+Backend (Flask):
+	•	All routes for creating, updating, deleting each record
+	•	Proper database updates and joins
+	•	Filtering and statistics endpoints
+
+Frontend (Jinja Templates):
+	•	All new data fields must be:
+	•	Visible
+	•	Editable
+	•	Integrated cleanly with the existing layout
+
+⸻
+
+Final Notes:
+
+Please make sure:
+	•	Everything is saved in the database
+	•	Everything is visible in the frontend
+	•	No previously working feature was removed
+	•	No placeholder or “planned” feature — everything must be implemented and tested
+
+If something is blocking this, let me know and I’ll help. Otherwise, please confirm when all this is fully done.
+
+Thanks!

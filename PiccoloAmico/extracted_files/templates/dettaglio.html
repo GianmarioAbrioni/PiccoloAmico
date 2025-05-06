@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dettaglio Cane</title>
+</head>
+<body>
+    <h1>{{ cane.nome }}</h1>
+    <p><strong>Razza:</strong> {{ cane.razza }}</p>
+    <p><strong>Colore:</strong> {{ cane.colore }}</p>
+    <p><strong>Microchip:</strong> {{ cane.microchip }}</p>
+    <p><strong>Box attuale:</strong> {{ cane.box }}</p>
+    <p><strong>Stato attuale:</strong> {{ cane.stato }}</p>
+
+    <h2>Aggiorna Stato</h2>
+    <form method="post" action="/aggiorna_stato/{{ cane.id }}">
+        <input type="text" name="stato" placeholder="es: in calore, incinta, partorito il...">
+        <input type="submit" value="Aggiorna">
+    </form>
+
+    <h2>Sposta Cane</h2>
+    <form method="post" action="/sposta/{{ cane.id }}">
+        <input type="text" name="nuovo_box" placeholder="es: Box 2">
+        <input type="submit" value="Sposta">
+    </form>
+
+    <h2>Storico Eventi</h2>
+    <ul>
+        {% for evento in eventi %}
+        <li><strong>{{ evento.data }}</strong>: {{ evento.tipo }} - {{ evento.descrizione }}</li>
+        {% endfor %}
+    </ul>
+
+    <p><a href="/pdf/{{ cane.id }}">Stampa scheda PDF</a> | <a href="/">Torna all'elenco</a></p>
+</body>
+</html>

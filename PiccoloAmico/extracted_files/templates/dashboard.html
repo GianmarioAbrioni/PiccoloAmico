@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    <p><strong>Cani totali:</strong> {{ totale }}</p>
+    <p><strong>In calore:</strong> {{ in_calore }}</p>
+    <p><strong>Incinte:</strong> {{ incinte }}</p>
+    <p><strong>Fuori allevamento:</strong> {{ fuori }}</p>
+
+    <canvas id="grafico" width="400" height="200"></canvas>
+    <script>
+    const ctx = document.getElementById('grafico');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Totale', 'In calore', 'Incinte', 'Fuori'],
+            datasets: [{
+                label: 'Cani',
+                data: [{{ totale }}, {{ in_calore }}, {{ incinte }}, {{ fuori }}]
+            }]
+        }
+    });
+    </script>
+    <p><a href="/">Torna alla home</a></p>
+</body>
+</html>

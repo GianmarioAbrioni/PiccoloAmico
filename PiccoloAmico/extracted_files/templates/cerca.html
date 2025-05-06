@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Risultati ricerca</title>
+</head>
+<body>
+    <h1>Risultati per "{{ query }}"</h1>
+    {% if cani %}
+    <ul>
+        {% for cane in cani %}
+        <li>
+            <a href="/cane/{{ cane.id }}">{{ cane.nome }}</a> (Microchip: {{ cane.microchip }}) - Box: {{ cane.box }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>Nessun risultato trovato.</p>
+    {% endif %}
+    <p><a href="/">Torna alla home</a></p>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Scheda Cane</title></head>
+<body>
+    <h1>{{ cane.nome }}</h1>
+    <p><strong>Razza:</strong> {{ cane.razza }}</p>
+    <p><strong>Colore:</strong> {{ cane.colore }}</p>
+    <p><strong>Microchip:</strong> {{ cane.microchip }}</p>
+    <p><strong>Box:</strong> {{ cane.box }}</p>
+    <p><strong>Stato:</strong> {{ cane.stato }}</p>
+
+    <h2>Storico Eventi</h2>
+    <ul>
+        {% for e in eventi %}
+        <li>{{ e['data'] }} - {{ e['tipo'] }}: {{ e['descrizione'] }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,786 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-dog me-2"></i>{{ dog.name }}</h1>
+    <div>
+        <a href="{{ url_for('dog_edit', dog_id=dog.id) }}" class="btn btn-warning me-2">
+            <i class="fas fa-edit me-1"></i> Edit
+        </a>
+        <a href="{{ url_for('dogs_list') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to List
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Dog Details Card -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0"><i class="fas fa-info-circle me-2"></i>Dog Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Breed:</div>
+                    <div class="col-md-8">{{ dog.breed }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Gender:</div>
+                    <div class="col-md-8">
+                        {% if dog.gender == 'Male' %}
+                        <span class="badge bg-primary"><i class="fas fa-mars me-1"></i>Male</span>
+                        {% else %}
+                        <span class="badge bg-danger"><i class="fas fa-venus me-1"></i>Female</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Birth Date:</div>
+                    <div class="col-md-8">
+                        {% if dog.birth_date %}
+                            {{ dog.birth_date.strftime('%Y-%m-%d') }}
+                            <br>
+                            <small class="text-muted">Age: {{ dog.age_string }}</small>
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Microchip:</div>
+                    <div class="col-md-8">
+                        {% if dog.microchip_number %}
+                            {{ dog.microchip_number }}
+                            <br>
+                            <small class="text-muted">
+                                Status: 
+                                {% if dog.chip_inserito == 'Yes' %}
+                                    <span class="badge bg-success">Inserted</span>
+                                    {% if dog.microchip_data %}
+                                        on {{ dog.microchip_data.strftime('%Y-%m-%d') }}
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-warning">Not inserted</span>
+                                {% endif %}
+                            </small>
+                        {% else %}
+                            No microchip
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Sale Status:</div>
+                    <div class="col-md-8">
+                        {% if dog.venduto == 'Yes' %}
+                            <span class="badge bg-success">Sold</span>
+                        {% else %}
+                            <span class="badge bg-warning">Not sold</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Registration #:</div>
+                    <div class="col-md-8">{{ dog.registration_number or 'Not registered' }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Status:</div>
+                    <div class="col-md-8">
+                        {% if dog.is_active %}
+                        <span class="badge bg-success">Active</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Sire (Father):</div>
+                    <div class="col-md-8">
+                        {% if dog.sire %}
+                            <a href="{{ url_for('dog_detail', dog_id=dog.sire.id) }}">
+                                {{ dog.sire.name }} ({{ dog.sire.breed }})
+                            </a>
+                        {% else %}
+                            Unknown/Not recorded
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Dam (Mother):</div>
+                    <div class="col-md-8">
+                        {% if dog.dam %}
+                            <a href="{{ url_for('dog_detail', dog_id=dog.dam.id) }}">
+                                {{ dog.dam.name }} ({{ dog.dam.breed }})
+                            </a>
+                        {% else %}
+                            Unknown/Not recorded
+                        {% endif %}
+                    </div>
+                </div>
+                {% if dog.notes %}
+                <div class="row mt-3">
+                    <div class="col-12 fw-bold">Notes:</div>
+                    <div class="col-12 mt-1">
+                        <div class="p-2 bg-light rounded">{{ dog.notes }}</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Location Card -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-info text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="fas fa-map-marker-alt me-2"></i>Current Location</h5>
+                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#addLocationModal">
+                        <i class="fas fa-plus"></i> Update
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if current_location %}
+                <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Location:</div>
+                    <div class="col-md-8">{{ current_location.location_name }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Since:</div>
+                    <div class="col-md-8">{{ current_location.start_date.strftime('%Y-%m-%d') if current_location.start_date else 'Unknown' }}</div>
+                </div>
+                {% if current_location.description %}
+                <div class="row mb-2">
+                    <div class="col-md-4 fw-bold">Description:</div>
+                    <div class="col-md-8">{{ current_location.description }}</div>
+                </div>
+                {% endif %}
+                {% if current_location.notes %}
+                <div class="row mt-3">
+                    <div class="col-12 fw-bold">Notes:</div>
+                    <div class="col-12 mt-1">
+                        <div class="p-2 bg-light rounded">{{ current_location.notes }}</div>
+                    </div>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i> No current location recorded for this dog.
+                    <button type="button" class="btn btn-sm btn-warning ms-2" data-bs-toggle="modal" data-bs-target="#addLocationModal">
+                        Add Location
+                    </button>
+                </div>
+                {% endif %}
+
+                <hr>
+
+                <h6 class="mb-3"><i class="fas fa-history me-2"></i>Location History</h6>
+                {% if locations %}
+                <div class="list-group">
+                    {% for location in locations|sort(attribute='start_date', reverse=True) %}
+                    <div class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ location.location_name }}</h6>
+                            <small>{{ location.start_date.strftime('%Y-%m-%d') }}</small>
+                        </div>
+                        {% if location.end_date %}
+                        <small class="text-muted">Until: {{ location.end_date.strftime('%Y-%m-%d') }}</small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info">No location history recorded.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Health & Breeding Information -->
+<div class="row">
+    <!-- Heat Cycles Card (for females only) -->
+    {% if dog.gender == 'Female' %}
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="fas fa-calendar-alt me-2"></i>Heat Cycles</h5>
+                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#addHeatCycleModal">
+                        <i class="fas fa-plus"></i> Add
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if heat_cycles %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Intensity</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cycle in heat_cycles|sort(attribute='start_date', reverse=True) %}
+                            <tr>
+                                <td>{{ cycle.start_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ cycle.end_date.strftime('%Y-%m-%d') if cycle.end_date else 'Ongoing' }}</td>
+                                <td>
+                                    {% if cycle.intensity == 'Mild' %}
+                                        <span class="badge bg-info">Mild</span>
+                                    {% elif cycle.intensity == 'Moderate' %}
+                                        <span class="badge bg-warning">Moderate</span>
+                                    {% elif cycle.intensity == 'Severe' %}
+                                        <span class="badge bg-danger">Severe</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Not specified</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ cycle.notes or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> No heat cycles recorded for this dog.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Pregnancies Card (for females only) -->
+    {% if dog.gender == 'Female' %}
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="fas fa-baby me-2"></i>Pregnancies</h5>
+                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#addPregnancyModal">
+                        <i class="fas fa-plus"></i> Add
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if pregnancies %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Start Date</th>
+                                <th>Sire</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Litter Size</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pregnancy in pregnancies|sort(attribute='start_date', reverse=True) %}
+                            <tr>
+                                <td>{{ pregnancy.start_date.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    {% if pregnancy.sire %}
+                                        <a href="{{ url_for('dog_detail', dog_id=pregnancy.sire.id) }}">
+                                            {{ pregnancy.sire.name }}
+                                        </a>
+                                    {% else %}
+                                        Unknown
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if pregnancy.actual_due_date %}
+                                        {{ pregnancy.actual_due_date.strftime('%Y-%m-%d') }}
+                                    {% elif pregnancy.expected_due_date %}
+                                        {{ pregnancy.expected_due_date.strftime('%Y-%m-%d') }} (Expected)
+                                    {% else %}
+                                        Not set
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if pregnancy.status == 'Active' %}
+                                        <span class="badge bg-primary">Active</span>
+                                    {% elif pregnancy.status == 'Completed' %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% elif pregnancy.status == 'Terminated' %}
+                                        <span class="badge bg-danger">Terminated</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ pregnancy.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if pregnancy.litter_size %}
+                                        {{ pregnancy.litter_size }} puppies
+                                        {% if pregnancy.males_count is not none and pregnancy.females_count is not none %}
+                                            ({{ pregnancy.males_count }}M / {{ pregnancy.females_count }}F)
+                                        {% endif %}
+                                    {% elif pregnancy.status == 'Active' %}
+                                        Pending
+                                    {% else %}
+                                        Not recorded
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> No pregnancies recorded for this dog.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Stud Services Card (for males only) -->
+    {% if dog.gender == 'Male' %}
+    <div class="col-md-12 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0"><i class="fas fa-syringe me-2"></i>Stud Services</h5>
+            </div>
+            <div class="card-body">
+                {% set stud_services = pregnancies|selectattr('sire_id', 'equalto', dog.id)|list %}
+                {% if stud_services %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Female</th>
+                                <th>Litter Size</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for service in stud_services|sort(attribute='start_date', reverse=True) %}
+                            <tr>
+                                <td>{{ service.start_date.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    <a href="{{ url_for('dog_detail', dog_id=service.dog_id) }}">
+                                        {{ service.dog.name }} ({{ service.dog.breed }})
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if service.litter_size %}
+                                        {{ service.litter_size }} puppies
+                                    {% elif service.status == 'Active' %}
+                                        Pending
+                                    {% else %}
+                                        Not recorded
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if service.status == 'Active' %}
+                                        <span class="badge bg-primary">Active</span>
+                                    {% elif service.status == 'Completed' %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% elif service.status == 'Terminated' %}
+                                        <span class="badge bg-danger">Terminated</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ service.status }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> No stud services recorded for this dog.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Vaccinations Card -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0"><i class="fas fa-syringe me-2"></i>Vaccinations</h5>
+                        <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#addVaccinationModal">
+                            <i class="fas fa-plus"></i> Add Vaccination
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if dog.vaccinations %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vacc in dog.vaccinations|sort(attribute='data', reverse=true) %}
+                                <tr>
+                                    <td>{{ vacc.data.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ vacc.tipo }}</td>
+                                    <td>{{ vacc.note or '-' }}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editVaccinationModal{{ vacc.id }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <form action="{{ url_for('delete_vaccination', vacc_id=vacc.id) }}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">No vaccinations recorded</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Modals for adding new records -->
+
+<!-- Add Location Modal -->
+<div class="modal fade" id="addLocationModal" tabindex="-1" aria-labelledby="addLocationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="addLocationModalLabel">Update Dog Location</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addLocationForm" method="POST" action="/api/locations">
+                <div class="modal-body">
+                    <input type="hidden" name="dog_id" value="{{ dog.id }}">
+                    <input type="hidden" name="is_current" value="true">
+
+                    <div class="mb-3">
+                        <label for="location_name" class="form-label">Location Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="location_name" name="location_name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="description" name="description">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Location</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Heat Cycle Modal -->
+{% if dog.gender == 'Female' %}
+<div class="modal fade" id="addHeatCycleModal" tabindex="-1" aria-labelledby="addHeatCycleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="addHeatCycleModalLabel">Add Heat Cycle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addHeatCycleForm" method="POST" action="/api/heat-cycles">
+                <div class="modal-body">
+                    <input type="hidden" name="dog_id" value="{{ dog.id }}">
+
+                    <div class="mb-3">
+                        <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="heat_start_date" name="start_date" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="heat_end_date" name="end_date">
+                        <small class="form-text text-muted">Leave blank if cycle is ongoing</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="intensity" class="form-label">Intensity</label>
+                        <select class="form-select" id="intensity" name="intensity">
+                            <option value="">Not specified</option>
+                            <option value="Mild">Mild</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="Severe">Severe</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="heat_notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="heat_notes" name="notes" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Heat Cycle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Add Pregnancy Modal -->
+{% if dog.gender == 'Female' %}
+<div class="modal fade" id="addPregnancyModal" tabindex="-1" aria-labelledby="addPregnancyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="addPregnancyModalLabel">Add Pregnancy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addPregnancyForm" method="POST" action="/api/pregnancies">
+                <div class="modal-body">
+                    <input type="hidden" name="dog_id" value="{{ dog.id }}">
+
+                    <div class="mb-3">
+                        <label for="sire_id" class="form-label">Sire (Father)</label>
+                        <select class="form-select" id="pregnancy_sire_id" name="sire_id">
+                            <option value="">Unknown/Not Selected</option>
+                            {% for male_dog in male_dogs %}
+                            <option value="{{ male_dog.id }}">{{ male_dog.name }} - {{ male_dog.breed }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="pregnancy_start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="pregnancy_start_date" name="start_date" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="expected_due_date" class="form-label">Expected Due Date</label>
+                        <input type="date" class="form-control" id="expected_due_date" name="expected_due_date">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="Active">Active</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Terminated">Terminated</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="pregnancy_notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="pregnancy_notes" name="notes" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Pregnancy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Add Vaccination Modal -->
+<div class="modal fade" id="addVaccinationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Vaccination</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('manage_vaccinations', dog_id=dog.id) }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="tipo" class="form-label">Vaccine Type</label>
+                        <input type="text" class="form-control" id="tipo" name="tipo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="data" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="data" name="data" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="note" class="form-label">Notes</label>
+                        <textarea class="form-control" id="note" name="note" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set default date values to today
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    const today = new Date().toISOString().split('T')[0];
+
+    dateInputs.forEach(input => {
+        if (!input.value) {
+            input.value = today;
+        }
+    });
+
+    // Form submission handling for location modal
+    const addLocationForm = document.getElementById('addLocationForm');
+    if (addLocationForm) {
+        addLocationForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(addLocationForm);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            fetch('/api/locations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while saving the location');
+            });
+        });
+    }
+
+    // Form submission handling for heat cycle modal
+    const addHeatCycleForm = document.getElementById('addHeatCycleForm');
+    if (addHeatCycleForm) {
+        addHeatCycleForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(addHeatCycleForm);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            fetch('/api/heat-cycles', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while saving the heat cycle');
+            });
+        });
+    }
+
+    // Form submission handling for pregnancy modal
+    const addPregnancyForm = document.getElementById('addPregnancyForm');
+    if (addPregnancyForm) {
+        addPregnancyForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(addPregnancyForm);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            fetch('/api/pregnancies', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while saving the pregnancy');
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
+<h3>Data di nascita</h3>
+<p>{{ cane['data_nascita'] }}</p>
+<p><strong>Età:</strong> {% if cane['data_nascita'] %}{{ calcola_eta(cane['data_nascita']) }}{% else %}-{% endif %}</p>
+
+<h3>Fuori struttura</h3>
+<p>{{ cane['fuori_struttura'] }}</p>
+<p>Data uscita: {{ cane['data_uscita'] }}<br>Data rientro: {{ cane['data_rientro'] }}</p>
+
+
+<h3>Genealogia</h3>
+<ul>
+  <li><strong>Padre:</strong>
+    {% if dog.father %}
+      <a href="{{ url_for('dog_detail', dog_id=dog.father.id) }}">{{ dog.father.nome }}</a>
+    {% else %}
+      -
+    {% endif %}
+  </li>
+  <li><strong>Madre:</strong>
+    {% if dog.mother %}
+      <a href="{{ url_for('dog_detail', dog_id=dog.mother.id) }}">{{ dog.mother.nome }}</a>
+    {% else %}
+      -
+    {% endif %}
+  </li>
+</ul>
+{% if dog.father_children or dog.mother_children %}
+  <h4>Figli Registrati:</h4>
+  <ul>
+    {% for figlio in dog.father_children + dog.mother_children %}
+      <li><a href="{{ url_for('dog_detail', dog_id=figlio.id) }}">{{ figlio.nome }}</a> ({{ figlio.birth_date }})</li>
+    {% endfor %}
+  </ul>
+{% endif %}

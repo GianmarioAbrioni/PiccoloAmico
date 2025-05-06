@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="it" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestionale Allevamento{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .sidebar {
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+        }
+        .main-content {
+            min-height: 100vh;
+        }
+        .card {
+            transition: transform 0.2s;
+            margin-bottom: 1rem;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .stats-card {
+            border-left: 4px solid var(--bs-primary);
+        }
+
+        /* Mobile responsive styles */
+        @media (max-width: 767.98px) {
+            .sidebar {
+                height: auto;
+                position: relative;
+                padding-bottom: 1rem;
+            }
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+            .main-content {
+                padding: 1rem !important;
+            }
+            .mobile-spacing {
+                margin-bottom: 1.5rem;
+            }
+            .mobile-full {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+            .sidebar-toggle {
+                display: block;
+                margin-bottom: 1rem;
+            }
+            .collapse-sidebar {
+                display: none;
+            }
+        }
+
+        /* Form improvement */
+        .form-control, .form-select {
+            margin-bottom: 0.5rem;
+        }
+        .btn-toolbar {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Mobile menu button (visible only on small screens) -->
+            <div class="d-md-none pb-2 pt-3 px-3">
+                <button class="btn btn-primary btn-sm w-100" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false">
+                    <i class="bi bi-list me-2"></i> Menu
+                </button>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse" id="sidebarMenu">
+                <div class="position-sticky pt-3">
+                    <div class="d-flex justify-content-center mb-4">
+                        <h3>Gestionale<br>Allevamento</h3>
+                    </div>
+                    <hr>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/">
+                                <i class="bi bi-house-door"></i> Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/aggiungi">
+                                <i class="bi bi-plus-circle"></i> Aggiungi Cane
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/cerca">
+                                <i class="bi bi-search"></i> Cerca
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/filtri">
+                                <i class="bi bi-funnel"></i> Filtri Avanzati
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard">
+                                <i class="bi bi-graph-up"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/eventi_per_data">
+                                <i class="bi bi-calendar-event"></i> Eventi
+                            </a>
+                        </li>
+                    </ul>
+                    <hr>
+                    <div class="px-3 mb-3 text-center">
+                        <small class="text-muted">© 2025 Gestionale Allevamento</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main content -->
+            <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="container py-4">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

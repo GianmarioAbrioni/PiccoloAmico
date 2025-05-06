@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gestione Allevamento</title>
+</head>
+<body>
+    <h1>Elenco Cani</h1>
+    <form action="/cerca" method="get">
+        <input type="text" name="q" placeholder="Cerca per nome o microchip">
+        <input type="submit" value="Cerca">
+    </form>
+    <a href="/aggiungi">Aggiungi nuovo cane</a>
+
+    <h2>Statistiche</h2>
+    <p><strong>Totale cani:</strong> {{ totale }}</p>
+
+    <h3>Cani per stato</h3>
+    <ul>
+        {% for stato in per_stato %}
+        <li>{{ stato['stato'] or "Nessuno" }}: {{ stato['conta'] }}</li>
+        {% endfor %}
+    </ul>
+
+    <h3>Cani per box</h3>
+    <ul>
+        {% for box in per_box %}
+        <li><a href="/box/{{ box['box'] }}">{{ box['box'] }}</a>: {{ box['conta'] }}</li>
+        {% endfor %}
+    </ul>
+
+    <p><a href="/filtri"><strong>Vai alla ricerca avanzata</strong></a></p>
+<h2>Lista completa</h2>
+    <ul>
+        {% for cane in cani %}
+        <li>
+            <a href="/cane/{{ cane.id }}">{{ cane.nome }}</a>
+            (Box: <a href="/box/{{ cane.box }}">{{ cane.box }}</a>) - Stato: {{ cane.stato }}
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

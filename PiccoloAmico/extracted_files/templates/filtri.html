@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ricerca Avanzata</title>
+</head>
+<body>
+    <h1>Ricerca Avanzata</h1>
+    <form method="get">
+        Stato: <input type="text" name="stato" value="{{ stato }}"><br>
+        Box: <input type="text" name="box" value="{{ box }}"><br>
+        Fuori Allevamento: 
+        <select name="fuori">
+            <option value="">--</option>
+            <option value="si" {% if fuori == 'si' %}selected{% endif %}>Sì</option>
+            <option value="no" {% if fuori == 'no' %}selected{% endif %}>No</option>
+        </select><br>
+        <input type="submit" value="Filtra">
+    </form>
+
+    {% if cani %}
+    <h2>Risultati</h2>
+    <ul>
+        {% for cane in cani %}
+        <li><a href="/cane/{{ cane.id }}">{{ cane.nome }}</a> - Stato: {{ cane.stato }} - Box: {{ cane.box }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>Nessun cane trovato con i criteri selezionati.</p>
+    {% endif %}
+    <p><a href="/">Torna alla home</a></p>
+</body>
+</html>

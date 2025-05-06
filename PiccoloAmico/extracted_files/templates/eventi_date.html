@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Eventi per data</title>
+</head>
+<body>
+    <h1>Filtra Eventi per Data</h1>
+    <form method="get">
+        Dal: <input type="datetime-local" name="dal" value="{{ data_min }}"><br>
+        Al: <input type="datetime-local" name="al" value="{{ data_max }}"><br>
+        <input type="submit" value="Filtra">
+    </form>
+    {% if eventi %}
+    <h2>Eventi trovati</h2>
+    <ul>
+        {% for e in eventi %}
+        <li>{{ e['data'] }} - Cane ID {{ e['cane_id'] }} - {{ e['tipo'] }}: {{ e['descrizione'] }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>Nessun evento trovato nel range indicato.</p>
+    {% endif %}
+    <p><a href="/">Torna alla home</a></p>
+</body>
+</html>

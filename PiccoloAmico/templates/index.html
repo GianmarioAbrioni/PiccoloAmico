@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+{% block title %}Gestionale Allevamento - Home{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="mb-0">Dashboard Allevamento</h2>
+                    <div>
+                        <a href="/aggiungi" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Aggiungi nuovo cane
+                        </a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Quick search -->
+                    <div class="col-md-6 offset-md-3 mb-4">
+                        <form action="/cerca" method="get" class="d-flex">
+                            <input type="text" name="q" class="form-control me-2" placeholder="Cerca per nome o microchip">
+                            <button type="submit" class="btn btn-secondary">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <!-- Total dogs -->
+    <div class="col-md-4">
+        <div class="card stats-card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Totale Cani</h5>
+                <h2 class="display-3 text-center fw-bold">{{ totale }}</h2>
+                <div class="text-center mt-3">
+                    <a href="/filtri" class="btn btn-sm btn-outline-secondary">Filtra elenco</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dogs by status -->
+    <div class="col-md-4">
+        <div class="card stats-card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Cani per Stato</h5>
+                <div class="list-group list-group-flush mt-2">
+                    {% for stato in per_stato %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                        <span>{{ stato[0] if stato[0] else "Nessuno" }}</span>
+                        <span class="badge bg-primary rounded-pill">{{ stato[1] }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dogs by box -->
+    <div class="col-md-4">
+        <div class="card stats-card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Cani per Box</h5>
+                <div class="list-group list-group-flush mt-2">
+                    {% for box in per_box %}
+                    <a href="/box/{{ box['box'] }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-transparent">
+                        <span>Box {{ box['box'] }}</span>
+                        <span class="badge bg-info rounded-pill">{{ box['conta'] }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dog list -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Elenco Completo</h5>
+                <div>
+                    <a href="/filtri" class="btn btn-sm btn-outline-secondary">Ricerca Avanzata</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Box</th>
+                                <th>Stato</th>
+                                <th>Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cane in cani %}
+                            <tr>
+                                <td><a href="/cane/{{ cane.id }}" class="text-decoration-none">{{ cane.nome }}</a></td>
+                                <td><a href="/box/{{ cane.box }}" class="text-decoration-none">{{ cane.box }}</a></td>
+                                <td><span class="badge bg-secondary">{{ cane.stato or 'Nessuno' }}</span></td>
+                                <td>
+                                    <a href="/cane/{{ cane.id }}" class="btn btn-sm btn-outline-primary">Dettagli</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

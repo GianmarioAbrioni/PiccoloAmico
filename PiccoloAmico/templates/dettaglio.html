@@ -1,0 +1,299 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2>{{ cane.nome }}</h2>
+        <div>
+            <a href="{{ url_for('modifica_cane', id=cane.id) }}" class="btn btn-warning">Modifica</a>
+            <form action="{{ url_for('elimina_cane', id=cane.id) }}" method="POST" style="display: inline;">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Sei sicuro di voler eliminare questo cane?')">Elimina</button>
+            </form>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Informazioni Base</h4>
+                <p><strong>Nome:</strong> {{ cane.nome }}</p>
+                <p><strong>Sesso:</strong> {{ cane.sesso }}</p>
+                <p><strong>Razza:</strong> {{ cane.razza }}</p>
+                <p><strong>Colore:</strong> {{ cane.colore }}</p>
+                <p><strong>Box:</strong> {{ cane.box }}</p>
+                {% if cane.birth_date %}
+                <p><strong>Data di nascita:</strong> {{ cane.birth_date.strftime('%d/%m/%Y') }} 
+                    ({{ calcola_eta(cane.birth_date.strftime('%Y-%m-%d')) }})</p>
+                {% endif %}
+                <p><strong>Stato vendita:</strong> 
+                    {% if cane.is_sold %}
+                        <span class="badge bg-success">Venduto</span>
+                    {% else %}
+                        <span class="badge bg-warning">Disponibile</span>
+                    {% endif %}
+                </p>
+
+                <!-- Box Movement Form -->
+                <form action="{{ url_for('sposta_cane', id=cane.id) }}" method="POST" class="mt-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="nuovo_box" placeholder="Nuovo box" required>
+                        <button type="submit" class="btn btn-primary">Sposta Box</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-md-6">
+                <h4>Informazioni Microchip</h4>
+                <p><strong>Numero:</strong> {{ cane.microchip_number or 'Non disponibile' }}</p>
+                <p><strong>Inserito:</strong> {{ 'Sì' if cane.microchip_inserted else 'No' }}</p>
+                {% if cane.microchip_date %}
+                <p><strong>Data inserimento:</strong> {{ cane.microchip_date.strftime('%d/%m/%Y') }}</p>
+                {% endif %}
+
+                <h4 class="mt-4">Stato Presenza</h4>
+                <form action="{{ url_for('aggiorna_presenza', id=cane.id) }}" method="POST" class="mb-3">
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="is_out" name="is_out" {% if cane.is_out %}checked{% endif %}>
+                        <label class="form-check-label" for="is_out">Fuori struttura</label>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Data uscita</label>
+                        <input type="date" class="form-control" name="out_date" value="{{ cane.out_date.strftime('%Y-%m-%d') if cane.out_date else '' }}">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Data rientro prevista</label>
+                        <input type="date" class="form-control" name="return_date" value="{{ cane.return_date.strftime('%Y-%m-%d') if cane.return_date else '' }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Aggiorna Presenza</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Vaccinations Section -->
+        <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>Vaccinazioni</h4>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addVaccinationModal">
+                    <i class="bi bi-plus"></i> Aggiungi Vaccinazione
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Note</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vacc in cane.vaccinations %}
+                        <tr>
+                            <td>{{ vacc.vaccine_date.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ vacc.vaccine_type }}</td>
+                            <td>{{ vacc.notes or '' }}</td>
+                            <td>
+                                <form action="{{ url_for('delete_vaccination', vacc_id=vacc.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Eliminare questa vaccinazione?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mating Events Section -->
+        <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>Accoppiamenti</h4>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addMatingModal">
+                    <i class="bi bi-plus"></i> Aggiungi Accoppiamento
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Maschio</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in cane.mating_events %}
+                        <tr>
+                            <td>{{ event.mating_date.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ event.mating_type }}</td>
+                            <td>{{ event.male_dog.name if event.male_dog else 'Non specificato' }}</td>
+                            <td>
+                                <form action="{{ url_for('elimina_accoppiamento', id=event.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Eliminare questo accoppiamento?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Births Section -->
+        <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>Parti</h4>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addBirthModal">
+                    <i class="bi bi-plus"></i> Aggiungi Parto
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Cuccioli</th>
+                            <th>Note</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for birth in cane.births %}
+                        <tr>
+                            <td>{{ birth.birth_date.strftime('%d/%m/%Y') }}</td>
+                            <td>{{ birth.birth_type }}</td>
+                            <td>{{ birth.puppy_count }}</td>
+                            <td>{{ birth.notes or '' }}</td>
+                            <td>
+                                <form action="{{ url_for('elimina_parto', id=birth.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Eliminare questo parto?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Vaccination Modal -->
+<div class="modal fade" id="addVaccinationModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Aggiungi Vaccinazione</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('add_vaccination', cane_id=cane.id) }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <select class="form-select bg-dark text-white border-secondary" id="vaccine_type" name="tipo" required>
+                            <option value="">Seleziona tipo...</option>
+                            <option value="Parvovirosi">Parvovirosi</option>
+                            <option value="Cimurro">Cimurro</option>
+                            <option value="Leptospirosi">Leptospirosi</option>
+                            <option value="Rabbia">Rabbia</option>
+                            <option value="Altro">Altro</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <input type="date" class="form-control bg-dark text-white border-secondary" id="vaccine_date" name="data" required>
+                    </div>
+                    <div class="mb-3">
+                        <textarea class="form-control bg-dark text-white border-secondary" id="vaccine_notes" name="note" rows="3" placeholder="Note"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="submit" class="btn btn-info">Salva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Mating Modal -->
+<div class="modal fade" id="addMatingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Aggiungi Accoppiamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('aggiungi_accoppiamento', dog_id=cane.id) }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="mating_date" class="form-label">Data</label>
+                        <input type="date" class="form-control" id="mating_date" name="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mating_type" class="form-label">Tipo</label>
+                        <select class="form-control" id="mating_type" name="type" required>
+                            <option value="natural">Naturale</option>
+                            <option value="artificial">Artificiale</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="male_dog_id" class="form-label">Maschio</label>
+                        <select class="form-control" id="male_dog_id" name="male_dog_id" required>
+                            <option value="">Seleziona maschio...</option>
+                            {% for male in male_dogs %}
+                            <option value="{{ male.id }}">{{ male.name }} - {{ male.breed }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Birth Modal -->
+<div class="modal fade" id="addBirthModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Aggiungi Parto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('aggiungi_parto', dog_id=cane.id) }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <input type="date" class="form-control bg-dark text-white border-secondary" id="birth_date" name="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <select class="form-select bg-dark text-white border-secondary" id="birth_type" name="type" required>
+                            <option value="natural">Naturale</option>
+                            <option value="cesarean">Cesareo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <input type="number" class="form-control bg-dark text-white border-secondary" id="puppy_count" name="puppies_count" required min="1" placeholder="Numero Cuccioli">
+                    </div>
+                    <div class="mb-3">
+                        <textarea class="form-control bg-dark text-white border-secondary" id="birth_notes" name="notes" rows="3" placeholder="Note"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="submit" class="btn btn-success">Salva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
